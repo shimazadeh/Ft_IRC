@@ -1,0 +1,31 @@
+-March: 200 + 900 + 330 + 330 = 1800
+	-hood: 400
+	-immediate ikea item: 700
+	-stove: 700
+
+-April: 200 + 330
+	-6 lamps: 500
+
+-May: 200 + 330
+	-curtain: 100
+	-desk that is a dining table: 200
+	-tv fixture: 250
+
+-June: 200 + 330
+	-Corsica
+	-tv stand: 100
+
+-July: 200 + 330
+	-Amsterdam
+	-dishwasher: 200
+	-bed sheet: 100
+	-coffee table: 100
+
+-August: 200
+
+-September:200 + 330
+	-2 armchairs: 600
+
+-Bed: 500 Dec Jan
+-mattress: 1000 Dec Jan
+-fridge: 900: Oct and Nov
