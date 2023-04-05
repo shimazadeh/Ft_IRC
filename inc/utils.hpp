@@ -6,31 +6,44 @@
 #include <set>
 #include <algorithm>
 #include <string>
+#include <deque>
+#include <list>
+#include <map>
+#include <vector>
 
-class Users
+class User
 {
 	public:
 
 	private:
-		std::string	nickname;
-
-
+		std::string			nickname;
+		std::string			user_name;
+		std::string			real_name;
+		std::list<Channel*>	_channels;
 };
-typedef struct User_struct
-{
-	Users			_user;
-	User_struct		*next;
-
-}		User_struct_t;
 
 class Channel
 {
 	public:
 
 	private:
-		User_struct		*list;
+		std::deque<User*>	_users;
+		std::deque<User*>	_invites;
+		std::deque<User*>	_blocked;
+
 
 };
+
+class Ban_User
+{
+	private:
+
+	public:
+		Ban_User(/* args */);
+		~Ban_User();
+};
+
+
 
 
 #endif
