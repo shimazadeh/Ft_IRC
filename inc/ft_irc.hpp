@@ -12,10 +12,13 @@
 #include <sys/poll.h>
 #include <sys/time.h>
 #include <cstring>
+#include <stdexcept>
 
-#define SERVER_PORT  12345
+#include <map>
+#include <vector>
+#include <unordered_map>
+#include <utility>
 
-#define TRUE             1
-#define FALSE            0
-
+#define TIMEOUT 3
+#define BUFFER_SIZE 1024
 #endif
