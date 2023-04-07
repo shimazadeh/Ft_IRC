@@ -13,7 +13,7 @@ class Server
             _addr.sin6_family      = AF_INET6;
             memcpy(&_addr.sin6_addr, &in6addr_any, sizeof(in6addr_any));
             _addr.sin6_port        = htons(_port);
-            
+
             _ret = 1;
             _closscon = false;
             memset(&_tmpfd, 0, sizeof(_tmpfd));
@@ -50,17 +50,30 @@ class Server
 
             _fds.push_back(_tmpfd);
 
-            _ret = setsockopt(_tmpfd.fd, SOL_SOCKET,  SO_REUSEADDR, (char *)&on, sizeof(on));
+            _ret = setsockopt(_fds[0].fd, SOL_SOCKET,  SO_REUSEADDR, (char *)&on, sizeof(on));
             if (_ret < 0)
             {
                 perror("setsockopt() failed");
                 serv_exit(1);
             }
 
-            _ret = ioctl(_tmpfd.fd, FIONBIO, (char *)&on);
+            _ret = ioctl(_fds[0].fd, FIONBIO, (char *)&on);
             if (_ret < 0)
             {
                 perror("ioctl() failed");
+                serv_exit(1);
+            }
+            _ret = bind(_fds[0].fd, (struct sockaddr *)&_addr, sizeof(_addr));
+            if (_ret < 0)
+            {
+                perror("bind() failed");
+                serv_exit(1);
+            }
+
+            _ret = listen(_fds[0].fd, 32);
+            if (_ret < 0)
+            {
+                perror("listen() failed");
                 serv_exit(1);
             }
         }
@@ -130,7 +143,7 @@ class Server
                     }
                 }
             }
- 
+
         }
 
         void    serv_exit(int _exitcode)
@@ -160,7 +173,7 @@ class Server
                 _closscon = true;
 			}
 
-            //add buffer to the USER object 
+            //add buffer to the USER object
             //execute command
             _par.execute();
         }
@@ -173,12 +186,12 @@ class Server
 
 
     private:
-        Tree                        _tree;
-        Parser                      _par;
-        
+        Tree                        _tree;//stores Users their fds and channels
+        Parser                      _par;//
+
         std::vector<struct pollfd>  _fds;
         struct sockaddr_in6         _addr;
-        
+
         const char                  *_pass;
         const int                   _port;
         int                         _ret;

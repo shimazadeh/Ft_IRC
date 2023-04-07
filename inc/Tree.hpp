@@ -3,54 +3,44 @@
 
 #include "ft_irc.hpp"
 #include "User.hpp"
-#include "murmur_hash.hpp"
-
-auto hash_func = [](const std::pair<std::string, int>& p) {
-    return murmur_hash_32(p.first.cstr(), p.first.length(), p.second);
-};
+#include "Channel.hpp"
 
 class Tree
 {
     private:
-        std::unordered_map<std::pair<int, std::string>, User, decltype(hashfunc)>   _m;
+        std::unordered_map<std::string, User*>   _user_to_nick;
+        std::unordered_map<int, User*>           _user_to_fd;
+        std::unordered_map<std::string, Channel>   _chto_channel;
 
     public:
         typedef std::unordered_map<std::pair<int, std::string>, User, decltype(hashfunc)>::iterator iterator;
 
-        Tree(): _m(hashfunc) {};
-        ~Tree();
-        
-        User& operator[](const std::string& nickname) 
+        Tree() {};
+        ~Tree() {};
+
+
+        void    insert(const std::string &nick_name, int    &fd)
         {
-            for (iterator p = _m.begin(); p != _m.end(); p++) 
-            {
-                if ((p->second)._nickname == nickname)
-                    return p->second;
-            }
-            throw std::runtime_error("Nickname not found");
+            User    user = new User(nick_namd, fd);
+            new User user(nick_name, fd);
+            _user_to_nick.insert(make_pair(nick_name, &user));
+            _user_to_fd.insert(make_pair(fd, &user));
         }
 
-        User& operator[](int fd) {
-            for (iterator p = _m.begin(); p != _m.end(); p++) 
-            {   
-                if ((p->second)._fd == fd)
-                    return p->second;
-            }
-            throw std::runtime_error("FD not found");
+
+        void    insert(const std::string &chan_name)
+        {
+            Channel chan();
+            _chto_channel.insert(make_pair(chan_name, chan));
         }
 
-        void    insert(const std::string &nick_name, int fd)
-        {
-            User user(nick_name, fd);
-            _m[{nick_name, fd}] = user;
-        }
-        void    add_buffer(std::string _buff, int flag, int fd, std::string _nick); // find the USER in the map & adds the read or write buffer to our USER
-        {
-
-        }
-        
-        void    remove_buffer()
-        {}
+        void find_usr_by_n
+        //modify nickname
+        //find user by fd
+        //find user by nickname
+        //find channel by name
+        //remove user
+        // remove channel
 };
 
 #endif
