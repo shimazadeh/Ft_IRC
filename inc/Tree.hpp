@@ -8,37 +8,50 @@
 class Tree
 {
     private:
-        std::unordered_map<std::string, User*>   _user_to_nick;
-        std::unordered_map<int, User*>           _user_to_fd;
-        std::unordered_map<std::string, Channel>   _chto_channel;
+        std::map<std::string, User*>      _user_to_nick;
+        std::map<int, User*>              _user_to_fd;
+        std::map<std::string, Channel>    _chto_channel;
 
     public:
-        typedef std::unordered_map<std::pair<int, std::string>, User, decltype(hashfunc)>::iterator iterator;
-
         Tree() {};
         ~Tree() {};
 
 
         void    insert(const std::string &nick_name, int    &fd)
         {
-            User    user = new User(nick_namd, fd);
-            new User user(nick_name, fd);
-            _user_to_nick.insert(make_pair(nick_name, &user));
-            _user_to_fd.insert(make_pair(fd, &user));
+            User    *user = new User(nick_name, fd);
+            _user_to_nick.insert(make_pair(nick_name, user));
+            _user_to_fd.insert(std::make_pair(fd, user));
         }
-
 
         void    insert(const std::string &chan_name)
         {
             Channel chan();
-            _chto_channel.insert(make_pair(chan_name, chan));
+            _chto_channel.insert(std::make_pair(chan_name, chan));
         }
 
-        void find_usr_by_n
+        User    *find_usr_by_nickname(std::string& nickname)
+        {
+            return((_user_to_nick.find(nickname))->second);
+        }
+
+        User    *find_usr_by_fd(int& fd)
+        {
+            return(_user_to_fd.find(fd)->second);
+        }
+
+        Channel   &find_channel(std::string& channel)
+        {
+            return((_chto_channel.find(channel))->second);
+        }
+        void    erase_user(User &user)
+        {
+
+        }
+
+        void    erase_channel(Channel   &user);
         //modify nickname
         //find user by fd
-        //find user by nickname
-        //find channel by name
         //remove user
         // remove channel
 };
