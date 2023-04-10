@@ -7,7 +7,7 @@
 class Parser
 {
     public:
-        Parser(User &user, Tree &tree);
+        Parser(User *user, Tree *tree);
         ~Parser();
 
         void    check_for_cmd();
@@ -22,8 +22,8 @@ class Parser
     private:
         std::string     _cmd;
         std::string     _param[];
-        User            &_user;
-        Tree            &_tree;
+        User            *_user;
+        Tree            *_tree;
 
 
 
