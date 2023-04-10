@@ -10,13 +10,19 @@ class Parser
         Parser(User &user, Tree &tree);
         ~Parser();
 
-        void    check_for_cmd();
-        void    tokenizer();
-        void    execute();
+        void    check_for_cmd();//go to the user object look for rbuff , check if there is valid command
+        void    tokenizer();//parse it and fill in the _cmd and _param
+        void    execute()//will check what cmd it is and it will call the cmd
+        {
+            if (_cmd.compare("JOIN"))
+                join();
+            else if //.....
+        }
 
         //in the commands you will mostly use find, erase, insert functions of map to execute
-        void    join();
+        void    join();//go the tree and modify the channel tree
         void    quit();
+        // ...
 
 
     private:

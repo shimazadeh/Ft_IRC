@@ -17,7 +17,7 @@ class Tree
         ~Tree() {};
 
 
-        void    insert(const std::string &nick_name, int    &fd)
+        void    insert(const std::string &nick_name, int &fd)
         {
             User    *user = new User(nick_name, fd);
             _user_to_nick.insert(make_pair(nick_name, user));
