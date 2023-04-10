@@ -2,12 +2,18 @@
 #define _PARSER_HPP
 
 #include "ft_irc.hpp"
-#include "User.hpp"
 
 class Parser
 {
     public:
-        Parser(User &user, Tree &tree);
+        Parser(Tree &tree)
+        {
+            _tree = &tree;
+            _cmd = "";
+            _param = NULL;
+            _user = NULL;
+        }
+
         ~Parser();
 
         void    check_for_cmd();//go to the user object look for rbuff , check if there is valid command
@@ -28,8 +34,8 @@ class Parser
     private:
         std::string     _cmd;
         std::string     _param[];
-        User            &_user;
-        Tree            &_tree;
+        User            *_user;
+        Tree            *_tree;
 
 
 
