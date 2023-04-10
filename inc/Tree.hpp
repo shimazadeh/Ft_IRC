@@ -14,7 +14,6 @@ class Tree
         Tree() {};
         ~Tree() {};
 
-
         void    insert(const std::string &nick_name, int    &fd)
         {
             User    *user = new User(nick_name, fd);
@@ -42,16 +41,23 @@ class Tree
         {
             return((_chto_channel.find(channel))->second);
         }
+
         void    erase_user(User &user)
         {
-            return (())
+            _user_to_nick.erase(user._nickname);
+            _user_to_fd.erase(user._fd);
+            user.erase_me_from_allchannel();
+
+            return ;
         }
 
-        void    erase_channel(Channel   &user);
+        void    erase_channel(std::string   _name)
+        {
+            _chto_channel.erase(_name);
+        }
+
+
         //modify nickname
-        //find user by fd
-        //remove user
-        // remove channel
 };
 
 #endif
