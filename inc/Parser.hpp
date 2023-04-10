@@ -2,12 +2,18 @@
 #define _PARSER_HPP
 
 #include "ft_irc.hpp"
-#include "User.hpp"
 
 class Parser
 {
     public:
-        Parser(User *user, Tree *tree);
+        Parser(Tree &tree)
+        {
+            _tree = &tree;
+            _cmd = "";
+            _param = NULL;
+            _user = NULL;
+        }
+
         ~Parser();
 
         void    check_for_cmd();

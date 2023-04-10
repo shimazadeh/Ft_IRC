@@ -2,8 +2,6 @@
 #define _TREE_HPP
 
 #include "ft_irc.hpp"
-#include "User.hpp"
-#include "Channel.hpp"
 
 class Tree
 {
@@ -46,7 +44,7 @@ class Tree
         }
         void    erase_user(User &user)
         {
-
+            return (())
         }
 
         void    erase_channel(Channel   &user);

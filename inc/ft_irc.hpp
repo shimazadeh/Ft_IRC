@@ -19,6 +19,14 @@
 #include <unordered_map>
 #include <utility>
 
+
+#include "Parser.hpp"
+#include "User.hpp"
+#include "Server.hpp"
+#include "Tree.hpp"
+#include "Channel.hpp"
+
+
 #define TIMEOUT 3
 #define BUFFER_SIZE 1024
 #endif

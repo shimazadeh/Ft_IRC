@@ -2,8 +2,6 @@
 #define _CHANNEL_HPP
 
 #include "ft_irc.hpp"
-#include "User.hpp"
-#include "Ban_User.hpp"
 
 class Channel
 {

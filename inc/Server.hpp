@@ -7,7 +7,7 @@
 class Server
 {
     public:
-        Server(const char*  pass, const int port):_pass(pass), _port(port)
+        Server(const char*  pass, const int port):_pass(pass), _port(port), _tree(Tree()), _par(Parser(_tree))
         {
             memset(&_addr, 0, sizeof(_addr));
             _addr.sin6_family      = AF_INET6;
@@ -17,6 +17,7 @@ class Server
             _ret = 1;
             _closscon = false;
             memset(&_tmpfd, 0, sizeof(_tmpfd));
+
 
         }
 
