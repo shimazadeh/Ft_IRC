@@ -121,6 +121,7 @@ class Parser
         void    notice();
 
 
+
     private:
         std::string     _cmd;
         std::string     _param[3];

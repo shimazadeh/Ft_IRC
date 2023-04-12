@@ -159,31 +159,68 @@ class Server
 
         void    handle_client_read(int &i)
         {
-            _ret = recv(_fds[i].fd, _buffer, BUFFER_SIZE, 0);
-            if (_ret < 0)
-            {
-                if (errno != EWOULDBLOCK)
-                {
-                    perror("  recv() failed");
-                    _closscon = true;
-                }
-            }
-            if (_ret == 0)
-            {
-                printf("  Connection closed\n");
-                _closscon = true;
+			_par.change_user(_tree.find_usr_by_fd(_fds[i].fd)->second);
+			while (!_closscon)
+			{
+				memset(_buffer, 0, BUFFER_SIZE);
+				_ret = recv(_fds[i].fd, _buffer, BUFFER_SIZE, 0);
+				if (_ret < 0)
+				{
+					if (errno == EWOULDBLOCK)
+						break ;
+					perror("  recv() failed");
+					_closscon = true;
+				}
+				if (_ret == 0)
+				{
+					printf("  Connection closed\n");
+					_closscon = true;
+				}
+				if (_ret <= 0)
+					memcpy(_buffer, "QUIT\r\n", 6);
+				(_par.get_user()).append(buffer);
 			}
-
-            //add buffer to the USER object
-            //execute command
             _par.execute();
         }
 
-        void    handle_client_write();
+        void    handle_client_write()
+		{
+			std::string& user_ref = _tree.find_usr_by_fd(_fds[i].fd)->second;
+			_ret = send(_fds[i].fd, &(user_ref.w_buff)[0], user_ref.wbuf_ref.size());
+			if (_ret == -1)
+			{
+				_closscon = true;
+				memcpy(_buffer, "QUIT\r\n", 6);
+				_par.change_user(user_ref);
+				(_par.get_user()).append(buffer);
+				_par.execute();
+				return ;
+			}
+			memmove(&(user_ref.w_buff)[0], &(user_ref.w_buff)[_ret], user_ref.w_buff.size() - _ret)
+			if _ret == w_buf_ref.size()
+			{
+
+			}
+		}
+	
         void    handle_lsocket_read()
         {
-            //add users with fd and nickname to the tree
-        }
+			_tmpfd.fd = 1;
+			while (new_sd != -1)
+			{
+				_tmpfd.fd = accept(listen_sd, NULL, NULL);
+				if (new_sd < 0)
+				{
+				if (errno != EWOULDBLOCK)
+				{
+					perror("  accept() failed");
+					serv_exit(1);
+				}
+				break ;
+        	}
+			fds[nfds].events = POLLIN;
+			fds.push_back(_tmpfd);
+		}
 
 
     private:
