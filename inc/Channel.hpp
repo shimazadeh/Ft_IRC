@@ -1,7 +1,10 @@
 #ifndef _CHANNEL_HPP
 #define _CHANNEL_HPP
 
+#include "User.hpp"
 #include "ft_irc.hpp"
+
+class User;
 
 class Channel
  {

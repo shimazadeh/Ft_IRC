@@ -3,11 +3,14 @@
 
 #include "ft_irc.hpp"
 #include "Tree.hpp"
+#include "Parser.hpp"
 
+class Tree;
+class Parser;
 class Server
 {
     public:
-        Server(const char*  pass, const int port):_pass(pass), _port(port), _tree(Tree()), _par(Parser(_tree))
+        Server(const char*  pass, const int port):_pass(pass), _port(port), _tree(Tree()), _par(Parser(_tree, _pass))
         {
             memset(&_addr, 0, sizeof(_addr));
             _addr.sin6_family      = AF_INET6;
@@ -17,8 +20,6 @@ class Server
             _ret = 1;
             _closscon = false;
             memset(&_tmpfd, 0, sizeof(_tmpfd));
-
-
         }
 
         ~Server();
@@ -106,7 +107,7 @@ class Server
                             break ;
                         case 2:
                         case 4:
-                            handle_client_read();
+                            handle_client_read(i);
                             break;
                         case 5:
                             std::cout << "Poll(), incorrect revents" << std::endl;
@@ -117,7 +118,7 @@ class Server
                     if (_closscon)
                     {
                         close(_fds[i].fd);
-                        _fds.erase(&_fds[i]);
+                        _fds.erase(_fds.begin() + i);
                         _closscon = false;
                     }
                 }
@@ -128,7 +129,7 @@ class Server
                     {
                         case 3:
                         case 4:
-                            handle_client_write();
+                            handle_client_write(i);
                             break ;
                         case 5:
                             std::cout << "Poll(), incorrect revents" << std::endl;
@@ -139,7 +140,7 @@ class Server
                     if (_closscon)
                     {
                         close(_fds[i].fd);
-                        _fds.erase(&_fds[i]);
+                        _fds.erase(_fds.begin() + i);
                         _closscon = false;
                     }
                 }
@@ -159,7 +160,7 @@ class Server
 
         void    handle_client_read(int &i)
         {
-			_par.change_user(_tree.find_usr_by_fd(_fds[i].fd)->second);
+			_par.change_user(_tree.find_usr_by_fd(_fds[i].fd));
 			while (!_closscon)
 			{
 				memset(_buffer, 0, BUFFER_SIZE);
@@ -178,45 +179,46 @@ class Server
 				}
 				if (_ret <= 0)
 					memcpy(_buffer, "QUIT\r\n", 6);
-				(_par.get_user()).append(buffer);
+				(_par.get_user())->_rbuff.append(_buffer);
 			}
             _par.execute();
         }
 
-        void    handle_client_write()
+        void    handle_client_write(int &i)
 		{
-			std::string& user_ref = _tree.find_usr_by_fd(_fds[i].fd)->second;
-			_ret = send(_fds[i].fd, &(user_ref.w_buff)[0], user_ref.wbuf_ref.size());
+			User* user_ref = _tree.find_usr_by_fd(_fds[i].fd);
+			_ret = send(_fds[i].fd, &(user_ref->_wbuff)[0], user_ref->_wbuff.size(), 0);
 			if (_ret == -1)
 			{
 				_closscon = true;
 				memcpy(_buffer, "QUIT\r\n", 6);
 				_par.change_user(user_ref);
-				(_par.get_user()).append(buffer);
+				user_ref->_rbuff.append(_buffer);
 				_par.execute();
 				return ;
 			}
-			memmove(&(user_ref.w_buff)[0], &(user_ref.w_buff)[_ret], user_ref.w_buff.size() - _ret)
+			memmove(&(user_ref->_wbuff)[0], &(user_ref->_wbuff)[_ret], user_ref->_wbuff.size() - _ret);
 		}
-	
+
         void    handle_lsocket_read()
         {
 			_tmpfd.fd = 1;
-			while (new_sd != -1)
+			while (_tmpfd.fd != -1)
 			{
-				_tmpfd.fd = accept(listen_sd, NULL, NULL);
-				if (new_sd < 0)
-				{
-				if (errno != EWOULDBLOCK)
-				{
-					perror("  accept() failed");
-					serv_exit(1);
-				}
-				break ;
-        	}
-			fds[nfds].events = POLLIN & POLLOUT;
-			fds.push_back(_tmpfd);
-		}
+                _tmpfd.fd = accept(_fds[0].fd, NULL, NULL);
+                if (_tmpfd.fd < 0)
+                {
+                    if (errno != EWOULDBLOCK)
+                    {
+                        perror("  accept() failed");
+                        serv_exit(1);
+                    }
+                    break ;
+                }
+                _tmpfd.events = POLLIN & POLLOUT;
+                _fds.push_back(_tmpfd);
+		    }
+        }
 
 
     private:

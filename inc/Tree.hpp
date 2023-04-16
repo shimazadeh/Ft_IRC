@@ -2,6 +2,11 @@
 #define _TREE_HPP
 
 #include "ft_irc.hpp"
+#include "User.hpp"
+#include "Channel.hpp"
+
+class User;
+class Channel;
 
 class Tree
 {
@@ -50,7 +55,7 @@ class Tree
         {
             _user_to_nick.erase(user._nickname);
             _user_to_fd.erase(user._fd);
-            user.erase_me_from_allchannel();
+            user.erase_me_from_allchannel(get_channel());
 
             return ;
         }

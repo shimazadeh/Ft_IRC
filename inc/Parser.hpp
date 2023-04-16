@@ -3,20 +3,33 @@
 
 #include "ft_irc.hpp"
 
+#include "Channel.hpp"
+#include "Tree.hpp"
+
+class Tree;
+class Channel;
+
 class Parser
 {
     public:
-        Parser(Tree &tree, std::string password)
+        Parser(Tree& tree, std::string password)
         {
             _tree = &tree;
             _cmd = "";
-            _user = NULL;//fix this
+            _user = NULL;
             _pass = password;
         }
 
         ~Parser()
         {
         }
+
+        void    change_user(User    *username)
+        {
+            _user = username;
+        }
+
+        User    *get_user(){return (_user);}
 
         int    check_for_cmd()
         {
@@ -68,9 +81,7 @@ class Parser
 
         void    execute()
         {
-            if (_cmd.compare("CAP") == 0)
-                cap();
-            else if (_cmd.compare("PASS") == 0)
+            if (_cmd.compare("PASS") == 0)
                 pass();
             else if (_cmd.compare("NICK") == 0)
                 nick();
@@ -308,7 +319,7 @@ class Parser
             }
         }
 
-        void    join()//incomplete, //check parsing ?
+        void    join()
         {
             std::map<std::string, Channel>::iterator it = _tree->get_channel().find(_param[0]);
 
@@ -402,7 +413,7 @@ class Parser
         std::vector<std::string>     _param;
         User                        *_user;
         Tree                        *_tree;
-        std::string                 _pass;//discuss late
+        std::string                 _pass;
 
 };
 #endif
