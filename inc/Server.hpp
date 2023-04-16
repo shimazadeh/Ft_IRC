@@ -197,10 +197,6 @@ class Server
 				return ;
 			}
 			memmove(&(user_ref.w_buff)[0], &(user_ref.w_buff)[_ret], user_ref.w_buff.size() - _ret)
-			if _ret == w_buf_ref.size()
-			{
-
-			}
 		}
 	
         void    handle_lsocket_read()
@@ -218,7 +214,7 @@ class Server
 				}
 				break ;
         	}
-			fds[nfds].events = POLLIN;
+			fds[nfds].events = POLLIN & POLLOUT;
 			fds.push_back(_tmpfd);
 		}
 
