@@ -1,6 +1,6 @@
 #include "../inc/Server.hpp"
 
-Server(const char*  pass, const int port):_pass(pass), _port(port), _tree(Tree()), _par(Parser(_tree, _pass))
+Server::Server(const char*  pass, const int port):_pass(pass), _port(port), _tree(Tree()), _par(Parser(_tree, _pass))
 {
 	memset(&_addr, 0, sizeof(_addr));
 	_addr.sin6_family      = AF_INET6;
@@ -12,7 +12,7 @@ Server(const char*  pass, const int port):_pass(pass), _port(port), _tree(Tree()
 	memset(&_tmpfd, 0, sizeof(_tmpfd));
 }
 
-~Server();
+Server::~Server();
 
 int    check_revents(int i, short &_revents)
 {
@@ -29,7 +29,7 @@ int    check_revents(int i, short &_revents)
 	return (5);
 }
 
-void    set_up()
+void    Server::set_up()
 {
 	int on = 1;
 
@@ -70,7 +70,7 @@ void    set_up()
 	}
 }
 
-void    loop()
+void    Server::loop()
 {
 	_fds[0].events = POLLIN;
 
@@ -138,7 +138,7 @@ void    loop()
 
 }
 
-void    serv_exit(int _exitcode)
+void    Server::serv_exit(int _exitcode)
 {
 	for (int i = 0; i < _fds.size(); i++)
 	{
@@ -148,7 +148,7 @@ void    serv_exit(int _exitcode)
 	exit(_exitcode);
 }
 
-void    handle_client_read(int &i)
+void    Server::handle_client_read(int &i)
 {
 	_par.change_user(_tree.find_usr_by_fd(_fds[i].fd));
 	while (!_closscon)
@@ -174,7 +174,7 @@ void    handle_client_read(int &i)
 	_par.execute();
 }
 
-void    handle_client_write(int &i)
+void    Server::handle_client_write(int &i)
 {
 	User* user_ref = _tree.find_usr_by_fd(_fds[i].fd);
 	_ret = send(_fds[i].fd, &(user_ref->_wbuff)[0], user_ref->_wbuff.size(), 0);
@@ -190,7 +190,7 @@ void    handle_client_write(int &i)
 	memmove(&(user_ref->_wbuff)[0], &(user_ref->_wbuff)[_ret], user_ref->_wbuff.size() - _ret);
 }
 
-void    handle_lsocket_read()
+void    Server::handle_lsocket_read()
 {
 	_tmpfd.fd = 1;
 	while (_tmpfd.fd != -1)
