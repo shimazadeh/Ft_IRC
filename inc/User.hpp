@@ -19,25 +19,12 @@ class User
         bool                        _opstat;
         std::vector<Channel*>       _channels;
 
-        User(int fd):_fd(fd){}
-        User(std::string nick_name, int fd): _nickname(nick_name), _fd(fd){}
+        User(int fd);
+        User(std::string nick_name, int fd);
         ~User();
 
-        void    erase_me_from_allchannel(std::vector<Channel*>  &_chan)
-        {
-            for (int i = 0; i < _chan.size(); ++i)
-                _chan[i]->erase_user(*this);
-            _chan.clear();
-        }
-
-        std::string find_channel(std::string    chaname)
-        {
-            for (std::vector<Channel*>::iterator i = _channels.begin(); i != _channels.end(); i++)
-            {
-                if (!((*i)->get_name().compare(chaname)))
-                    return ((*i)->get_name());
-            }
-        }
+        void    erase_me_from_allchannel(std::vector<Channel*>  &_chan);
+        std::string find_channel(std::string    chaname);
 
 };
 #endif
