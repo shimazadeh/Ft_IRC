@@ -10,8 +10,8 @@ class User
         std::string                 _realname;
         std::string                 _username;
         std::string                 _wbuff;
-        std::string                 _rbuff;
-        int                         _regstat;
+        std::string                 _rbuff;//this needs to be char* for memmove
+        int                         _regstat;//0 = next command must be pass // 1 next command NICK // 2 mus be USER// 3 next command cannot be pass nick or user
         int                         _fd;
         bool                        _opstat;
         std::vector<Channel*>       _channels;
@@ -20,10 +20,11 @@ class User
         User(std::string nick_name, int fd): _nickname(nick_name), _fd(fd){}
         ~User();
 
-        void    erase_me_from_allchannel()
+        void    erase_me_from_allchannel(std::vector<Channel*>  &_chan)
         {
-            for (int i = 0; i < _channels.size(); ++i)
-                _channels[i]->erase_user(*this);
+            for (int i = 0; i < _chan.size(); ++i)
+                _chan[i]->erase_user(*this);
+            _chan.clear();
         }
 
         std::string find_channel(std::string    chaname)

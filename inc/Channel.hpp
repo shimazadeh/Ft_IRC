@@ -13,10 +13,9 @@ class Channel
          Channel();
          ~Channel();
 
-
-
          std::string get_name(){return (_name);}
-         std::string get_topic(){return (_topic);}
+         std::string &get_topic(){return (_topic);}
+         int         size(){return (_members.size());}
 
          void    add_member(User &user)
          {
@@ -33,50 +32,51 @@ class Channel
              _opers.push_back(&user);
          }
 
-         bool    erase_user(User &user)
+
+         bool    erase_user(User &user)//idk if all prototyppe has to  be changes to user*
          {
-             if (erase_members(user) || erase_opers(user) || erase_ban(user._nickname))
-                 return true;
-             return false;
+            if (erase_members(user) || erase_opers(user) || erase_ban(user._nickname))
+                return true;
+            return false;
          }
 
          bool    erase_members(User &user)
          {
-             for (iterator_user i = _members.begin(); i < _members.end(); i++)
-             {
-                 if (*i == &user)
-                 {
-                     _members.erase(i);
-                     return true;
-                 }
-             }
+            for (iterator_user i = _members.begin(); i < _members.end(); i++)
+            {
+                if (*i == &user)
+                {
+                    _members.erase(i);
+                    return true;
+                }
+            }
              return false;
          }
 
          bool    erase_opers(User &user)
          {
             for (iterator_user i = _opers.begin(); i < _opers.end(); i++)
-             {
-                 if (*i == &user)
-                 {
-                     _opers.erase(i);
-                     return true;
-                 }
-             }
+            {
+                if (*i == &user)
+                {
+                    _opers.erase(i);
+                    return true;
+                }
+            }
              return false;
          }
 
          bool    erase_ban(std::string _name)
          {
-             for (iterator_string i = _ban.begin(); i < _ban.end(); i++)
-             {
-                 if ((*i).compare(_name))
-                 {
-                     _ban.erase(i);
-                     return true;
-                 }
-             }
-             return false;
+            for (iterator_string i = _ban.begin(); i < _ban.end(); i++)
+            {
+                if ((*i).compare(_name))
+                {
+                    _ban.erase(i);
+                    return true;
+                }
+            }
+            return false;
          }
 
          bool    is_member(std::string _name)
@@ -109,6 +109,11 @@ class Channel
              return false;
          }
 
+        void    send_message_all_members(std::string _msg)
+        {
+            for (iterator_user it = _members.begin(); it != _members.end(); it++)
+                ((*it)->_wbuff).append(_msg);
+        }
 
      private:
          std::vector<User*>          _members;

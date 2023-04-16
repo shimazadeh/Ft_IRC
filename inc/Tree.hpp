@@ -41,9 +41,9 @@ class Tree
             return(_user_to_fd.find(fd)->second);
         }
 
-        Channel   &find_channel(std::string& channel)
+        std::map<std::string, Channel>::iterator find_channel(std::string& channel)
         {
-            return((_chto_channel.find(channel))->second);
+            return((_chto_channel.find(channel)));
         }
 
         void    erase_user(User &user)
