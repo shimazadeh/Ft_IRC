@@ -18,8 +18,8 @@ class Server
         void    set_up();
         void    loop();
         void    serv_exit(int _exitcode);
-        void    handle_client_read(int &i);
-        void    handle_client_write(int &i);
+        void    handle_client_read(size_t &i);
+        void    handle_client_write(size_t &i);
         void    handle_lsocket_read();
 
 

@@ -14,9 +14,10 @@ void    Tree::insert(const std::string &nick_name, int    &fd)
 	_user_to_fd.insert(std::make_pair(fd, user));
 }
 
-void    Tree::insert(const std::string &chan_name)
+void    Tree::insert(const std::string chan_name)
 {
-	Channel chan();
+	Channel chan;
+
 	_chto_channel.insert(std::make_pair(chan_name, chan));
 }
 
@@ -39,7 +40,7 @@ void    Tree::erase_user(User &user)
 {
 	_user_to_nick.erase(user._nickname);
 	_user_to_fd.erase(user._fd);
-	user.erase_me_from_allchannel(get_channel());
+	user.erase_me_from_allchannel();
 
 	return ;
 }

@@ -22,11 +22,11 @@ SRCDIR   = src/
 
 OBJDIR   = obj/
 
-SOURCES  := src/main.cpp
+SOURCES  := src/Channel.cpp  src/main.cpp  src/Parser.cpp  src/Server.cpp  src/Tree.cpp  src/User.cpp
 
 OBJECTS  := $(SOURCES:$(SRCDIR)%.cpp=$(OBJDIR)%.o)
 
-INCLUDES := inc/ft_irc.hpp
+INCLUDES := inc/Channel.hpp  inc/ft_irc.hpp  inc/Parser.hpp  inc/Server.hpp  inc/Tree.hpp  inc/User.hpp
 
 rm       = rm -f
 

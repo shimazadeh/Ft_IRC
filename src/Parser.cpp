@@ -22,7 +22,7 @@ User    *Parser::get_user(){return (_user);}
 int    Parser::check_for_cmd()
 {
 	std::string     buf = _user->_rbuff;
-	int             pos(0);
+	size_t             pos(0);
 
 	pos = buf.find("\r\n");
 	if (pos == std::string::npos)
@@ -196,7 +196,7 @@ void    Parser::quit()
 
 		_user->erase_me_from_allchannel(_user->_channels);
 		_tree->erase_user(*_user);
-		for (int i = 0; i < ch_tmp.size(); i++)
+		for (size_t i = 0; i < ch_tmp.size(); i++)
 			ch_tmp[i]->send_message_all_members("QUIT: " + _user->_nickname + " has left the channel " + *(_param.end() - 1));
 	}
 }
@@ -213,7 +213,7 @@ void    Parser::part()
 	{
 		std::vector<std::string>    params = custom_split(*(_param.begin()));
 
-		for (int i = 0; i < params.size(); i++)
+		for (size_t i = 0; i < params.size(); i++)
 		{
 			std::map<std::string, Channel>::iterator    it = _tree->get_channel().find(*(params.begin() + i));
 
@@ -352,7 +352,7 @@ void    Parser::privmsg()
 	{
 		std::vector<std::string>    targets = custom_split(*(_param.begin()));
 
-		for (int i = 0; i < targets.size(); i++)
+		for (size_t i = 0; i < targets.size(); i++)
 		{
 			User* tmp =_tree->find_usr_by_nickname(*(targets.begin() + i));
 			if (tmp)
@@ -384,7 +384,7 @@ void    Parser::notice()
 	{
 		std::vector<std::string>    targets = custom_split(*(_param.begin()));
 
-		for (int i = 0; i < targets.size(); i++)
+		for (size_t i = 0; i < targets.size(); i++)
 		{
 			User* tmp =_tree->find_usr_by_nickname(*(targets.begin() + i));
 			if (tmp)

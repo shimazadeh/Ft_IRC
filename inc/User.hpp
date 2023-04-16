@@ -24,6 +24,7 @@ class User
         ~User();
 
         void    erase_me_from_allchannel(std::vector<Channel*>  &_chan);
+        void    erase_me_from_allchannel(void);
         std::string find_channel(std::string    chaname);
 
 };

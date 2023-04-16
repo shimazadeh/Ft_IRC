@@ -24,7 +24,6 @@ void    Channel::add_oper(User &user)
 	_opers.push_back(&user);
 }
 
-
 bool    Channel::erase_user(User &user)//idk if all prototyppe has to  be changes to user*
 {
 	if (erase_members(user) || erase_opers(user) || erase_ban(user._nickname))
