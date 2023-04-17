@@ -1,7 +1,28 @@
 #include "../inc/User.hpp"
 
-User::User(int fd):_fd(fd){}
-User::User(std::string nick_name, int fd): _nickname(nick_name), _fd(fd){}
+User::User(int fd):_fd(fd)
+{
+	_nickname = "";
+	_realname = "";
+	_username = "";
+	_wbuff = "";
+	_rbuff = "";
+	_regstat = 0;
+	_fd = -1;
+	_opstat = false;
+}
+
+User::User(std::string nick_name, int fd): _nickname(nick_name), _fd(fd)
+{
+	_realname = "";
+	_username = "";
+	_wbuff = "";
+	_rbuff = "";
+	_regstat = 0;
+	_fd = -1;
+	_opstat = false;
+}
+
 User::~User(){}
 
 void    User::erase_me_from_allchannel(std::vector<Channel*>  &_chan)

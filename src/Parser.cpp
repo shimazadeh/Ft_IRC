@@ -24,7 +24,8 @@ int    Parser::check_for_cmd()
 	std::string     buf = _user->_rbuff;
 	size_t             pos(0);
 
-	pos = buf.find("\r\n");
+	std::cout << "IN CHECK CMD\n";
+	pos = buf.find("\n");
 	if (pos == std::string::npos)
 		return (1);
 	memmove(&(_user->_rbuff)[0], &(buf[0]), pos +1);
@@ -37,6 +38,7 @@ void    Parser::fill_in_params(std::string  buf)
 {
 	std::string::size_type prev_pos = 0, pos = 0;
 
+	std::cout << "IN FILL PARAMS\n";
 	while((pos = buf.find(32 , pos)) != std::string::npos || (pos = buf.find(9, pos)) != std::string::npos)
 	{
 		std::string substring( buf.substr(prev_pos, pos-prev_pos) );
@@ -69,6 +71,7 @@ std::vector<std::string>    Parser::custom_split(std::string buf)
 
 void    Parser::execute()
 {
+	std::cout << "IN EXECUTE\n";
 	if (_cmd.compare("PASS") == 0)
 		pass();
 	else if (_cmd.compare("NICK") == 0)

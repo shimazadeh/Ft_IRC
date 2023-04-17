@@ -50,7 +50,7 @@ class Parser
 
 /*
 
-1. check for \r\n
+1. check for \n
 2. take evrything before and extract if, memmove, if empty return
 3. split by ws
 4. fill in the fields (cmd + args)

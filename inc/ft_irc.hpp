@@ -8,7 +8,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/ioctl.h>
+#include <fcntl.h>
 #include <sys/poll.h>
 #include <sys/time.h>
 #include <cstring>
@@ -28,5 +28,5 @@
 
 
 #define TIMEOUT 3
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 100
 #endif
