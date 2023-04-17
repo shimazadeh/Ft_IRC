@@ -24,11 +24,13 @@ int    Parser::check_for_cmd()
 	std::string     buf = _user->_rbuff;
 	size_t             pos(0);
 
-	std::cout << "IN CHECK CMD\n";
+	std::cout << "IN CHECK CMD: " << _user->_rbuff << std::endl;
 	pos = buf.find("\n");
+	std::cout << "position: " << pos << std::endl;
 	if (pos == std::string::npos)
 		return (1);
-	memmove(&(_user->_rbuff)[0], &(buf[0]), pos +1);
+	_user->_rbuff = (_user->_rbuff).substr(pos + 1);
+	std::cout << "buff is: " << buf << std::endl;
 	buf = buf.substr(0, pos);
 	fill_in_params(buf);
 	return 0;
@@ -38,6 +40,8 @@ void    Parser::fill_in_params(std::string  buf)
 {
 	std::string::size_type prev_pos = 0, pos = 0;
 
+	_param.clear();
+	_cmd = "";
 	std::cout << "IN FILL PARAMS\n";
 	while((pos = buf.find(32 , pos)) != std::string::npos || (pos = buf.find(9, pos)) != std::string::npos)
 	{
@@ -71,7 +75,7 @@ std::vector<std::string>    Parser::custom_split(std::string buf)
 
 void    Parser::execute()
 {
-	std::cout << "IN EXECUTE\n";
+	std::cout << _cmd << std::endl;
 	if (_cmd.compare("PASS") == 0)
 		pass();
 	else if (_user->_regstat == 0)
@@ -103,15 +107,15 @@ void    Parser::execute()
 	else if (_cmd.compare("NOTICE") == 0)
 		notice();
 	else
-		(_user->_wbuff).append("Error: No such command\n");
+		(_user->_wbuff).append("Error: No such command: " + _cmd);
 }
 
 void    Parser::pass()//1
 {
-	if (_param.size() != 1)
-		(_user->_wbuff).append("PASS: wrong number of parameters\n");
-	else if (_user->_regstat > 1)
+	if (_user->_regstat > 1)
 		(_user->_wbuff).append("PASS: error: user is already connected\n");
+	else if (_param.size() != 1)
+		(_user->_wbuff).append("PASS: wrong number of parameters\n");
 	else if (!(*(_param.begin())).compare(_pass))
 		_user->_regstat = 1;
 	else
