@@ -44,3 +44,7 @@ int	main(int ac, const char **av)
 
 //https://www.tutorialspoint.com/unix_sockets/network_host_names.htm
 //nc 127.0.0.1 port#
+
+//QUESTIONS:
+// do we add the number of errors to the msgs?
+//match the error msges exactly as the protocol?

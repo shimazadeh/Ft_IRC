@@ -18,6 +18,8 @@ class Channel
 
          std::string get_name();
          std::string &get_topic();
+         std::vector<User*>     get_members();
+
          int         size();
 
          void    add_member(User &user);
@@ -33,6 +35,8 @@ class Channel
          bool    is_member(std::string _name);
          bool    is_ban(std::string _name);
          bool    is_oper(std::string _name);
+
+        std::string print_members();
 
         void    send_message_all_members(std::string _msg);
 
