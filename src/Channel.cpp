@@ -7,6 +7,8 @@ std::string Channel::get_name(){return (_name);}
 
 std::string &Channel::get_topic(){return (_topic);}
 
+std::vector<User*>     Channel::get_members(){return (_members);}
+
 int         Channel::size(){return (_members.size());}
 
 void    Channel::add_member(User &user)
@@ -104,4 +106,15 @@ void    Channel::send_message_all_members(std::string _msg)
 {
 for (iterator_user it = _members.begin(); it != _members.end(); it++)
 	((*it)->_wbuff).append(_msg);
+}
+
+std::string Channel::print_members()
+{
+	std::string	res;
+	std::vector<User*>	membs = get_members();
+
+	for (int i = 0; i < size() - 1; i++)
+		res.append(membs[i]->_username + ", ");
+	res.append(membs[size()]->_username);
+	return (res);
 }
