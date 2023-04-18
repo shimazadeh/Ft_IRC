@@ -26,11 +26,9 @@ int    Parser::check_for_cmd()
 
 	std::cout << "IN CHECK CMD: " << _user->_rbuff << std::endl;
 	pos = buf.find("\n");
-	std::cout << "position: " << pos << std::endl;
 	if (pos == std::string::npos)
 		return (1);
 	_user->_rbuff = (_user->_rbuff).substr(pos + 1);
-	std::cout << "buff is: " << buf << std::endl;
 	buf = buf.substr(0, pos);
 	fill_in_params(buf);
 	return 0;
@@ -73,7 +71,7 @@ std::vector<std::string>    Parser::custom_split(std::string buf)
 	return (res);
 }
 
-void    Parser::execute()
+void    Parser::execute(bool& closecon)
 {
 	std::cout << _cmd << std::endl;
 	if (_cmd.compare("PASS") == 0)
@@ -86,12 +84,13 @@ void    Parser::execute()
 		user();
 	else if (_cmd.compare("PING") == 0)
 		ping();
-	// else if (_cmd.compare("PONG") == 0)
-	// 	pong();
 	else if (_cmd.compare("USER") == 0)
 		user();
 	else if (_cmd.compare("QUIT") == 0)
+	{
 		quit();
+		closecon = true;
+	}
 	else if (_cmd.compare("PART") == 0)
 		part();
 	else if (_cmd.compare("TOPIC") == 0)
@@ -119,7 +118,10 @@ void    Parser::pass()//1
 	else if (!(*(_param.begin())).compare(_pass))
 		_user->_regstat = 1;
 	else
+	{
+		_user->_regstat = 0;
 		(_user->_wbuff).append("PASS: error: wrong password, try again !\n");
+	}
 }
 
 void    Parser::nick()//2
@@ -128,15 +130,17 @@ void    Parser::nick()//2
 		(_user->_wbuff).append("NICK: error: invalid number of parameters!\n");
 	else if (_user->_regstat == 0)
 		(_user->_wbuff).append("NICK: error: the password of the connection is not set\n");
-	else if (_tree->get_usernick().find(*(_param.begin())) != _tree->get_usernick().end())
+	else if (_tree->get_usernick().empty() && _tree->get_usernick().find(*(_param.begin())) != _tree->get_usernick().end())
 		(_user->_wbuff).append("NICK: error: nickname is already in use choose a different one\n");
-	else if (_tree->get_channel().find(*(_param.begin())) != _tree->get_channel().end())
+	else if (_tree->get_usernick().empty() && _tree->get_channel().find(*(_param.begin())) != _tree->get_channel().end())
 		(_user->_wbuff).append("NICK: error: nickname is already in the network\n");
 	else
 	{
-		(_user->_wbuff).append(_user->_nickname + " changed his nickname to " + *(_param.begin()));
+		(_user->_wbuff).append(_user->_nickname + " changed his nickname to " + *(_param.begin()) + "\n");
 		_user->_regstat = 2;
 		_user->_nickname = *(_param.begin());
+		_tree->insert_by_nick(_user->_nickname, _user);
+		std::cout << _tree->_user_to_nick.size() << std::endl;
 	}
 }
 
@@ -160,7 +164,7 @@ void    Parser::user()
 		_user->_username = *(_param.begin());
 		for (size_t i = 3; i < _param.size(); i++)//added for: parsing problem: the last param could have space
 			(_user->_realname).append(*(_param.begin() + i));
-		(_user->_wbuff).append("User gets registered with user name: " + _user->_username + " and real name: " + _user->_realname);
+		(_user->_wbuff).append("User gets registered with user name: " + _user->_username + " and real name: " + _user->_realname + "\n");
 	}
 }
 
@@ -211,8 +215,8 @@ void    Parser::quit()
 {
 	if (_param.size() != 1)
 		(_user->_wbuff).append("QUIT: error: invalid number of parameters!\n");
-	else if (_user->_regstat != 3)
-		(_user->_wbuff).append("QUIT: error: user is not registered, register first before quitting\n");
+	// else if (_user->_regstat != 3)
+	// 	(_user->_wbuff).append("QUIT: error: user is not registered, register first before quitting\n");
 	else
 	{
 		std::vector<Channel*>   ch_tmp = _user->_channels;
@@ -220,7 +224,7 @@ void    Parser::quit()
 		_user->erase_me_from_allchannel(_user->_channels);
 		_tree->erase_user(*_user);
 		for (size_t i = 0; i < ch_tmp.size(); i++)
-			ch_tmp[i]->send_message_all_members("QUIT: " + _user->_nickname + " has left the channel " + *(_param.end() - 1));
+			ch_tmp[i]->send_message_all_members("QUIT: " + _user->_nickname + " has left the channel " + *(_param.end() - 1) + "\n");
 
 	}
 }
@@ -248,7 +252,7 @@ void    Parser::part()
 			else
 			{
 				it->second.erase_members(*_user);
-				it->second.send_message_all_members("PART: " + _user->_nickname + " has left the channel " + *(_param.end() - 1));
+				it->second.send_message_all_members("PART: " + _user->_nickname + " has left the channel " + *(_param.end() - 1) + "\n");
 			}
 		}
 	}

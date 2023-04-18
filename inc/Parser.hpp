@@ -21,7 +21,7 @@ class Parser
         void                        fill_in_params(std::string  buf);
         std::vector<std::string>    custom_split(std::string buf);
 
-        void    execute();
+        void    execute(bool& closecon);
         void    pass();
         void    nick();
         void    user();

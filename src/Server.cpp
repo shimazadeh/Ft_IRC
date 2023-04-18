@@ -185,10 +185,9 @@ void    Server::handle_client_read(size_t &i)
 		if (_ret <= 0)
 			memcpy(_buffer, "QUIT\n", 6);
 		(_par.get_user())->_rbuff.append(_buffer);
-		std::cout << "in looop\n";
 	}
 	if (!_par.check_for_cmd())
-		_par.execute();
+		_par.execute(_closscon);
 }
 
 void    Server::handle_client_write(size_t &i)
@@ -201,15 +200,10 @@ void    Server::handle_client_write(size_t &i)
 		memcpy(_buffer, "QUIT\n", 6);
 		_par.change_user(user_ref);
 		user_ref->_rbuff.append(_buffer);
-		_par.execute();
+		_par.execute(_closscon);
 		return ;
 	}
 	user_ref->_wbuff = (user_ref->_wbuff).substr(_ret);
-	if (!user_ref->_wbuff.empty())
-	{
-		std::cout << " NPOOOOOOOOOOOOOOOOO]\n";
-		exit(0);
-	}
 }
 
 void    Server::handle_lsocket_read()
@@ -238,6 +232,6 @@ void    Server::handle_lsocket_read()
 		_fds.push_back(_tmpfd);
 		_tmpfd.events = POLLIN;
 		_fds.push_back(_tmpfd);
-		_tree.insert("", _tmpfd.fd);
+		_tree.insert_by_fd(_tmpfd.fd);
 	}
 }

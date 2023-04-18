@@ -10,21 +10,20 @@ class Channel;
 
 class Tree
 {
-    private:
+    public:
         std::map<std::string, User*>      _user_to_nick;
         std::map<int, User*>              _user_to_fd;
         std::map<std::string, Channel>    _chto_channel;//nicknames of all channels opened
-
-    public:
         Tree();
         ~Tree();
 
-        std::map<std::string, Channel>  get_channel();
-        std::map<std::string, User*>    get_usernick();
-        std::map<int, User*>            get_userfd();
+        std::map<std::string, Channel>  &get_channel();
+        std::map<std::string, User*>    &get_usernick();
+        std::map<int, User*>            &get_userfd();
 
-        void    insert(const std::string &nick_name, int    &fd);
+        void    insert_by_fd(int    &fd);
         void    insert(const std::string chan_name);
+        void    insert_by_nick(std::string& nickname, User* user);
         User    *find_usr_by_nickname(std::string& nickname);
         User    *find_usr_by_fd(int& fd);
 

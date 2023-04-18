@@ -3,15 +3,19 @@
 Tree::Tree() {};
 Tree::~Tree() {};
 
-std::map<std::string, Channel>  Tree::get_channel(){return (_chto_channel);}
-std::map<std::string, User*>    Tree::get_usernick(){return (_user_to_nick);}
-std::map<int, User*>            Tree::get_userfd(){return (_user_to_fd);}
+std::map<std::string, Channel>  &Tree::get_channel(){return (_chto_channel);}
+std::map<std::string, User*>    &Tree::get_usernick(){return (_user_to_nick);}
+std::map<int, User*>            &Tree::get_userfd(){return (_user_to_fd);}
 
-void    Tree::insert(const std::string &nick_name, int    &fd)
+void    Tree::insert_by_fd(int    &fd)
 {
-	User    *user = new User(nick_name, fd);
-	_user_to_nick.insert(make_pair(nick_name, user));
+	User    *user = new User("", fd);
 	_user_to_fd.insert(std::make_pair(fd, user));
+}
+
+void Tree::insert_by_nick(std::string& nickname, User* user)
+{
+	_user_to_nick.insert(make_pair(nickname, user));
 }
 
 void    Tree::insert(const std::string chan_name)
