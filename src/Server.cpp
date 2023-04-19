@@ -108,6 +108,7 @@ void    Server::loop()
 					user_ref->_rbuff.append(_buffer);
 					if (!_par.check_for_cmd())
 						_par.execute(_closscon);
+					std::cout << "FUCCCCC\n";
 					break ;
 				default:
 					break ;

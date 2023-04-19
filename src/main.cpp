@@ -48,6 +48,6 @@ int	main(int ac, const char **av)
 //QUESTIONS:
 
 /*
-1. SHIMA NEED TO FIX THE CHANNEL NAME WHEN JOINING 
 2. CTRL D OF THE SERVER ? 
+3. TOPIC mia "" gives the name of the channel back
 */

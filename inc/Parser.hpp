@@ -26,7 +26,6 @@ class Parser
         void    nick();
         void    user();
         void    ping();
-        void    pong();
         void    oper();//incomplete ,question: what is the password and name ??
         bool    quit();
         void    part();
@@ -36,7 +35,7 @@ class Parser
         void    join();
         void    privmsg();
         void    notice();
-
+        void    kill();
 
     private:
         std::string                  _cmd;

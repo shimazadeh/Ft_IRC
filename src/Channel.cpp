@@ -18,7 +18,6 @@ void    Channel::add_member(User &user)
 {
 	_members.push_back(&user);
 	user._channels.push_back(this);
-	std::cout <<"size is: " << _members.size() << std::endl;
 }
 
 void    Channel::add_ban(std::string _username)
@@ -81,7 +80,6 @@ bool    Channel::is_member(std::string _username)
 {
 	for (size_t i = 0; i != _members.size(); i++)
 	{
-		std::cout <<"debugg: " << _members[i]->_nickname << ", " << _username << std::endl;
 		if (!_members[i]->_nickname.compare(_username))
 			return true;
 	}
