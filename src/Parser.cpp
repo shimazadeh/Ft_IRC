@@ -80,12 +80,12 @@ void    Parser::execute(bool& closecon)
 		(_user->_wbuff).append("Error: the password of the connection is not set\n");
 	else if (_cmd.compare("NICK") == 0)
 		nick();
-	else if (_cmd.compare("PRIVMSG") == 0)
+	else if (_cmd.compare("USER") == 0)
 		user();
 	else if (_cmd.compare("PING") == 0)
 		ping();
-	else if (_cmd.compare("USER") == 0)
-		user();
+	else if (_cmd.compare("OPER") == 0)
+		oper();
 	else if (_cmd.compare("QUIT") == 0)
 	{
 		quit();
@@ -148,8 +148,10 @@ void    Parser::user()
 {
 	if (_user->_regstat == 0)
 		(_user->_wbuff).append("USER: error: the password of the connection is not set\n");
-	else if (_user->_regstat == 2)
-		(_user->_wbuff).append("USER: error: wrong registration step, nickname is not set\n");
+	else if (_user->_regstat != 2)
+	{
+=		(_user->_wbuff).append("USER: error: wrong registration step, nickname is not set\n");
+	}
 	else if (_param.size() != 4)
 		(_user->_wbuff).append("USER: error: invalid number of parameters!\n");
 	else if (_user->_regstat == 3)
