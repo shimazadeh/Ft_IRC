@@ -77,7 +77,6 @@ void    Server::loop()
 	_fds[0].events = POLLIN;
 	while(true)
 	{
-		std::cout << " b POLL\n";
 		_ret = poll(&_fds[0], _fds.size(), TIMEOUT * 60 * 1000);
 		if (_ret < 0)
 		{
@@ -170,10 +169,7 @@ void    Server::handle_client_read(size_t &i)
 		if (_ret < 0)
 		{
 			if (errno == EWOULDBLOCK)
-			{
-				std::cout << "BONJOUR " << std::endl;
 				break ;
-			}
 			perror("  recv() failed");
 			_closscon = true;
 		}
@@ -212,7 +208,6 @@ void    Server::handle_lsocket_read()
 	while (_tmpfd.fd != -1)
 	{
 		_tmpfd.fd = accept(_fds[0].fd, NULL, NULL);
-		std::cout << "tmp fd " << _tmpfd.fd << std::endl;
 		if (_tmpfd.fd < 0)
 		{
 			if (errno != EWOULDBLOCK)

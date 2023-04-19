@@ -28,7 +28,7 @@ class Parser
         void    ping();
         void    pong();
         void    oper();//incomplete ,question: what is the password and name ??
-        void    quit();
+        bool    quit();
         void    part();
         void    topic();
         void    invite();

@@ -6,7 +6,7 @@
 #    By: jeannecolmou <jeannecolmou@student.42.f    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/07/02 17:41:06 by shabibol          #+#    #+#              #
-#    Updated: 2023/04/18 15:38:36 by jeannecolmo      ###   ########.fr        #
+#    Updated: 2023/04/19 12:01:38 by jeannecolmo      ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,7 +14,7 @@ TARGET   = Ft_IRC
 
 CC       = g++
 
-CFLAGS   = -Wall -Wextra -g3 -std=c++98 -std=c++11
+CFLAGS   = -Wall -Wextra -g3 -std=c++98 
 
 LINKER   = g++
 
