@@ -17,6 +17,7 @@ int         Channel::size(){return (_members.size());}
 void    Channel::add_member(User &user)
 {
 	_members.push_back(&user);
+	user._channels.push_back(this);
 	std::cout <<"size is: " << _members.size() << std::endl;
 }
 

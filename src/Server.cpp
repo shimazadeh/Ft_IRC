@@ -74,6 +74,7 @@ void    Server::set_up()
 
 void    Server::loop()
 {
+	User* user_ref(NULL);
 	_fds[0].events = POLLIN;
 	while(true)
 	{
@@ -101,7 +102,13 @@ void    Server::loop()
 					break;
 				case 4:
 					std::cout << "Poll(), incorrect revents" << std::endl;
-					serv_exit(1);
+					user_ref = _tree.find_usr_by_fd(_fds[i].fd);
+					memcpy(_buffer, "QUIT unexpected_quit\n", 22);
+					_par.change_user(user_ref);
+					user_ref->_rbuff.append(_buffer);
+					if (!_par.check_for_cmd())
+						_par.execute(_closscon);
+					break ;
 				default:
 					break ;
 			}
@@ -123,7 +130,13 @@ void    Server::loop()
 					break ;
 				case 4:
 					std::cout << "Poll(), incorrect revents" << std::endl;
-					serv_exit(1);
+					user_ref = _tree.find_usr_by_fd(_fds[i].fd);
+					memcpy(_buffer, "QUIT unexpected_quit\n", 22);
+					_par.change_user(user_ref);
+					user_ref->_rbuff.append(_buffer);
+					if (!_par.check_for_cmd())
+						_par.execute(_closscon);
+					break ;
 				default:
 					break ;
 			}
@@ -192,11 +205,11 @@ void    Server::handle_client_write(size_t &i)
 	_ret = send(_fds[i].fd, &(user_ref->_wbuff)[0], user_ref->_wbuff.size(), 0);
 	if (_ret == -1)
 	{
-		_closscon = true;
 		memcpy(_buffer, "QUIT\n", 6);
 		_par.change_user(user_ref);
 		user_ref->_rbuff.append(_buffer);
-		_par.execute(_closscon);
+		if (!_par.check_for_cmd())
+			_par.execute(_closscon);
 		return ;
 	}
 	user_ref->_wbuff = (user_ref->_wbuff).substr(_ret);

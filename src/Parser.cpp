@@ -76,7 +76,10 @@ void    Parser::execute(bool& closecon)
 	else if (_cmd.compare("QUIT") == 0)
 	{
 		if (quit())
+		{
+		//	std::cout << "DODO ADORE FAIRE DODO" << std::endl;
 			closecon = true;
+		}
 	}
 	else if (_user->_regstat == 0)
 		(_user->_wbuff).append("Error: the password of the connection is not set\n");
@@ -103,7 +106,7 @@ void    Parser::execute(bool& closecon)
 	else if (_cmd.compare("NOTICE") == 0)
 		notice();
 	else
-		(_user->_wbuff).append("Error 421: No such command: " + _cmd);
+		(_user->_wbuff).append("Error 421: No such command: " + _cmd + "\n");
 }
 
 void    Parser::pass()//1
@@ -136,6 +139,8 @@ void    Parser::nick()//2
 	else
 	{
 		(_user->_wbuff).append("You changed your nickname to " + *(_param.begin()) + "\n");
+		if (_user->_nickname != "")
+			_tree->get_usernick().erase(_user->_nickname);
 		if (_user->_regstat != 3)
 			_user->_regstat = 2;
 		_user->_nickname = *(_param.begin());
@@ -210,7 +215,7 @@ bool    Parser::quit()
 	else
 	{
 		std::vector<Channel*>   ch_tmp = _user->_channels;
-
+		std::cout << ch_tmp.size() << std::endl;
 		_user->erase_me_from_allchannel(_user->_channels);
 		_tree->erase_user(*_user);
 		for (size_t i = 0; i < ch_tmp.size(); i++)
@@ -366,7 +371,6 @@ void    Parser::join()
 
 void    Parser::privmsg()
 {
-	std::cout << "HOLA HOLA HOLA HOL JOLA JHOLA JOLA\n";
 	if (_user->_regstat != 3)
 		(_user->_wbuff).append("PRIVMSG: error: user is not registered\n");
 	else if (_param.size() < 2)
@@ -378,14 +382,11 @@ void    Parser::privmsg()
 		std::vector<std::string>    targets = custom_split(*(_param.begin()));
 		for (size_t i = 0; i < targets.size(); i++)
 		{
-			std::cout << "inside PRIVMSG FOR LOOP 1\n";
 			User* tmp =_tree->find_usr_by_nickname(*(targets.begin() + i));
-			std::cout << "inside PRIVMSG FOR LOOP 1:1\n";
 			if (tmp)
-				(tmp->_wbuff).append(*(_param.begin() + 1));
+				(tmp->_wbuff).append(_user->_nickname + ": " + *(_param.begin() + 1) + "\n");
 			else
 			{
-				std::cout << "inside PRIVMSG ELSE 2\n";
 				std::map<std::string, Channel>::iterator tmp2 = _tree->find_channel(*(targets.begin() + i));
 				if (tmp2 != _tree->get_channel().end() && tmp2->second.is_ban(_user->_nickname))
 					(_user->_wbuff).append("PRIVMSG: error: you do not have the right to the channel\n");
@@ -393,7 +394,6 @@ void    Parser::privmsg()
 					(_user->_wbuff).append("PRIVMSG: error: no such target\n");
 				else
 				{
-					std::cout << "inside PRIVMSG ELSE 3\n";
 					(tmp2->second.send_message_all_members((*(_param.begin() + 1)) + "\n"));
 				}
 			}
