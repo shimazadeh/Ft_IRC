@@ -126,17 +126,17 @@ void    Parser::pass()//1
 
 void    Parser::nick()//2
 {
-	if (_param.size() != 1)
-		(_user->_wbuff).append("NICK: error: invalid number of parameters!\n");
-	else if (_user->_regstat == 0)
+	if (_user->_regstat == 0)
 		(_user->_wbuff).append("NICK: error: the password of the connection is not set\n");
+	else if (_param.size() != 1)
+		(_user->_wbuff).append("NICK: error: invalid number of parameters!\n");
 	else if (_tree->get_usernick().empty() && _tree->get_usernick().find(*(_param.begin())) != _tree->get_usernick().end())
 		(_user->_wbuff).append("NICK: error: nickname is already in use choose a different one\n");
 	else if (_tree->get_usernick().empty() && _tree->get_channel().find(*(_param.begin())) != _tree->get_channel().end())
 		(_user->_wbuff).append("NICK: error: nickname is already in the network\n");
 	else
 	{
-		(_user->_wbuff).append(_user->_nickname + " changed his nickname to " + *(_param.begin()) + "\n");
+		(_user->_wbuff).append("You changed your nickname to " + *(_param.begin()) + "\n");
 		_user->_regstat = 2;
 		_user->_nickname = *(_param.begin());
 		_tree->insert_by_nick(_user->_nickname, _user);
@@ -146,12 +146,12 @@ void    Parser::nick()//2
 
 void    Parser::user()
 {
-	if (_param.size() != 4)
-		(_user->_wbuff).append("USER: error: invalid number of parameters!\n");
-	else if (_user->_regstat == 0)
+	if (_user->_regstat == 0)
 		(_user->_wbuff).append("USER: error: the password of the connection is not set\n");
 	else if (_user->_regstat == 2)
 		(_user->_wbuff).append("USER: error: wrong registration step, nickname is not set\n");
+	else if (_param.size() != 4)
+		(_user->_wbuff).append("USER: error: invalid number of parameters!\n");
 	else if (_user->_regstat == 3)
 		(_user->_wbuff).append("USER: error: the user is already registered\n");
 	else if (*(_param.begin()) == "" || *(_param.begin() + 3) == "")
@@ -170,40 +170,27 @@ void    Parser::user()
 
 void    Parser::ping()
 {
-	if (_param.size() != 1)
-		(_user->_wbuff).append("PING: error : invalid number of parameters!\n");
-	else if (_user->_regstat != 3)
+	if (_user->_regstat != 3)
 		(_user->_wbuff).append("PING: error: user is not registered\n");
+	else if (_param.size() != 1)
+		(_user->_wbuff).append("PING: error : invalid number of parameters!\n");
 	else if (*(_param.begin()) == "")
 		(_user->_wbuff).append("PING: error: empty parameter\n");
 	else
 		(_user->_wbuff).append("PONG " + *(_param.begin()) + "\n");
 }
 
-// void    Parser::pong()
-// {
-// 	if (_param.size() != 1)
-// 		(_user->_wbuff).append("PONG: error: invalid number of parameters!\n");
-// 	else if (_user->_regstat != 3)
-// 		(_user->_wbuff).append("PONG: error: user is not registered\n");
-// 	else if (*(_param.begin()) == "")
-// 		(_user->_wbuff).append("PONG: error: empty parameter\n");
-// 	else
-// 		(_user->_wbuff).append("PING " + *(_param.begin()) + "\n");
-// }
-
 void    Parser::oper()//we choose to use our own password
 {
 	(_user->_wbuff).append("OPER: Attempt to register as an operator using a name of " + *(_param.begin()) + " and the password: " + *(_param.begin() + 1) + "\n");
-
-	if (_param.size() != 2)
+	if (_user->_regstat != 3)
+		(_user->_wbuff).append("OPER: error: user is not registered\n");
+	else if (_param.size() != 2)
 		(_user->_wbuff).append("OPER: error: invalid number of parameters!\n");
 	else if (!(*(_param.begin())).compare(_pass))
 		(_user->_wbuff).append("OPER: error: incorrect password!\n");
 	else if (!(*(_param.begin() + 1)).compare(_user->_username))
 		(_user->_wbuff).append("OPER: error: incorrect username!\n");
-	else if (_user->_regstat != 3)
-		(_user->_wbuff).append("OPER: error: user is not registered\n");
 	else
 	{
 		_user->_opstat = 1;
@@ -231,10 +218,10 @@ void    Parser::quit()
 
 void    Parser::part()
 {
-	if (_param.size() < 2)
-		(_user->_wbuff).append("PART: error: invalid number of parameters!\n");
-	else if (_user->_regstat != 3)
+	if (_user->_regstat != 3)
 		(_user->_wbuff).append("PART: error: user is not registered\n");
+	else if (_param.size() < 2)
+		(_user->_wbuff).append("PART: error: invalid number of parameters!\n");
 	else if (*(_param.begin()) == "" || *(_param.begin() + 1) == "")
 		(_user->_wbuff).append("PART: error: wrong parameters\n");
 	else
@@ -262,10 +249,10 @@ void    Parser::topic()
 {
 	std::map<std::string, Channel>::iterator it = _tree->get_channel().find(*(_param.begin()));
 
-	if (_param.size() < 1 || _param.size() > 2)
-		(_user->_wbuff).append("TOPIC: invalid number of parameters!\n");
-	else if (_user->_regstat != 3)
+	if (_user->_regstat != 3)
 		(_user->_wbuff).append("TOPIC: error: user is not registered\n");
+	else if (_param.size() < 1 || _param.size() > 2)
+		(_user->_wbuff).append("TOPIC: invalid number of parameters!\n");
 	else if (*(_param.begin()) == "")
 		(_user->_wbuff).append("TOPIC: error: channel parameter cannot be empty\n");
 	else if (!it->second.is_member(_user->_nickname))
@@ -292,10 +279,10 @@ void    Parser::invite()
 {
 	std::map<std::string, Channel>::iterator it = _tree->get_channel().find(*(_param.begin() + 1));
 
-	if (_param.size() != 2)
-		(_user->_wbuff).append("INVITE: invalid number of parameters!\n");
-	else if (_user->_regstat != 3)
+	if (_user->_regstat != 3)
 		(_user->_wbuff).append("INVITE: error: user is not registered\n");
+	else if (_param.size() != 2)
+		(_user->_wbuff).append("INVITE: invalid number of parameters!\n");
 	else if (*(_param.begin()) == "" || *(_param.begin() + 1) == "")
 		(_user->_wbuff).append("INVITE: error: empty parameters\n");
 	else if (!it->second.is_member(_user->_nickname))
@@ -322,10 +309,10 @@ void    Parser::kick()
 	std::string userToKick;
 	std::map<std::string, Channel>::iterator it = _tree->get_channel().find((*_param.begin()));
 
-	if (_param.size() == 2)//limiting one user per kick our choise
-		(_user->_wbuff).append("KICK: invalid number of parameters!\n");
-	else if (_user->_regstat != 3)
+	if (_user->_regstat != 3)
 		(_user->_wbuff).append("KICK: error: user is not registered\n");
+	else if (_param.size() == 2)//limiting one user per kick our choise
+		(_user->_wbuff).append("KICK: invalid number of parameters!\n");
 	else if (*(_param.begin()) == "" || *(_param.begin() + 1) == "")
 		(_user->_wbuff).append("KICK: error: empty parameters\n");
 	else if (it == _tree->get_channel().end())
@@ -345,10 +332,10 @@ void    Parser::join()
 {
 	std::map<std::string, Channel>::iterator it = _tree->get_channel().find(_param[0]);
 
-	if (_param.size() < 1)
-		(_user->_wbuff).append("JOIN: error: invalid number of parameters!\n");
-	else if (_user->_regstat != 3)
+	if (_user->_regstat != 3)
 		(_user->_wbuff).append("JOIN: error: user is not registered\n");
+	else if (_param.size() < 1)
+		(_user->_wbuff).append("JOIN: error: invalid number of parameters!\n");
 	else if (*(_param.begin()) == "" || *(_param.begin() + 1) == "")
 		(_user->_wbuff).append("JOIN: error: wrong parameters\n");
 	else if (it != _tree->get_channel().end())
@@ -370,16 +357,16 @@ void    Parser::join()
 
 void    Parser::privmsg()
 {
-	if (_param.size() < 2)
-		(_user->_wbuff).append("PRIVMSG: error: invalid number of parameters!\n");
-	else if (_user->_regstat != 3)
+	std::cout << "HOLA HOLA HOLA HOL JOLA JHOLA JOLA\n";
+	if (_user->_regstat != 3)
 		(_user->_wbuff).append("PRIVMSG: error: user is not registered\n");
+	else if (_param.size() < 2)
+		(_user->_wbuff).append("PRIVMSG: error: invalid number of parameters!\n");
 	else if (*(_param.begin()) == "" || *(_param.begin() + 1) == "")
 		(_user->_wbuff).append("PRIVMSG: error: empty parameters\n");
 	else
 	{
 		std::vector<std::string>    targets = custom_split(*(_param.begin()));
-
 		for (size_t i = 0; i < targets.size(); i++)
 		{
 			User* tmp =_tree->find_usr_by_nickname(*(targets.begin() + i));
@@ -401,16 +388,15 @@ void    Parser::privmsg()
 
 void    Parser::notice()//dont really know the intention BUT we need to make it different from privmsg
 {
-	if (_param.size() < 2)
-		(_user->_wbuff).append("NOTICE: error: invalid number of parameters!\n");
-	else if (_user->_regstat != 3)
+	if (_user->_regstat != 3)
 		(_user->_wbuff).append("NOTICE: error: user is not registered\n");
+	else if (_param.size() < 2)
+		(_user->_wbuff).append("NOTICE: error: invalid number of parameters!\n");
 	else if (*(_param.begin()) == "" || *(_param.begin() + 1) == "")
 		(_user->_wbuff).append("NOTICE: error: empty parameters\n");
 	else
 	{
 		std::vector<std::string>    targets = custom_split(*(_param.begin()));
-
 		for (size_t i = 0; i < targets.size(); i++)
 		{
 			User* tmp =_tree->find_usr_by_nickname(*(targets.begin() + i));
