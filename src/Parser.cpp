@@ -237,13 +237,15 @@ void    Parser::part()
 
 			if (it == _tree->get_channel().end())
 				(_user->_wbuff).append("PART: error: channel " + *(params.begin() + i) + " does not exist\n");
-			else if (!it->second.is_member(_user->_nickname))
+			else if (!(it->second).is_member(_user->_nickname))
 				(_user->_wbuff).append("PART: error: user is not in the channel\n");
 			else
 			{
 				it->second.erase_members(*_user);
 				it->second.send_message_all_members("PART: " + _user->_nickname + " has left the channel " + *(_param.end() - 1) + "\n");
 			}
+			if (it->second.size() == 0)
+				_tree->erase_channel(*(_param.begin()));
 		}
 	}
 }
@@ -341,18 +343,22 @@ void    Parser::join()
 		(_user->_wbuff).append("JOIN: error: invalid number of parameters!\n");
 	else if (*(_param.begin()) == "")
 		(_user->_wbuff).append("JOIN: error: wrong parameters\n");
-	else if (it == _tree->get_channel().end())
-		_tree->insert(*(_param.begin()));
-	else
+	else 
 	{
+		if (it == _tree->get_channel().end())
+		{
+			_tree->insert(*(_param.begin()));
+			it = _tree->get_channel().find(_param[0]);
+			(_user->_wbuff).append("JOIN: you created the channel: " + *(_param.begin()));
+		}
 		if (it->second.is_ban(_user->_nickname))
 			(_user->_wbuff).append("JOIN: error: user is banned from this channel\n");
 		else
 		{
 			it->second.add_member(*_user);
-			(_user->_wbuff).append("JOIN: you've joined the channel: " + it->second.get_name());
+			(_user->_wbuff).append("JOIN: you've joined the channel: " + it->second.get_name()) + "\n";
 			if (it->second.get_topic() != "")
-				(_user->_wbuff).append("JOIN: topic of the channel is : " + it->second.get_topic());
+				(_user->_wbuff).append("JOIN: topic of the channel is : " + it->second.get_topic()) + "\n";
 			(_user->_wbuff).append(it->second.print_members());
 		}
 	}
@@ -372,18 +378,24 @@ void    Parser::privmsg()
 		std::vector<std::string>    targets = custom_split(*(_param.begin()));
 		for (size_t i = 0; i < targets.size(); i++)
 		{
+			std::cout << "inside PRIVMSG FOR LOOP 1\n";
 			User* tmp =_tree->find_usr_by_nickname(*(targets.begin() + i));
+			std::cout << "inside PRIVMSG FOR LOOP 1:1\n";
 			if (tmp)
 				(tmp->_wbuff).append(*(_param.begin() + 1));
 			else
 			{
+				std::cout << "inside PRIVMSG ELSE 2\n";
 				std::map<std::string, Channel>::iterator tmp2 = _tree->find_channel(*(targets.begin() + i));
 				if (tmp2 != _tree->get_channel().end() && tmp2->second.is_ban(_user->_nickname))
 					(_user->_wbuff).append("PRIVMSG: error: you do not have the right to the channel\n");
 				else if (tmp2 == _tree->get_channel().end())
 					(_user->_wbuff).append("PRIVMSG: error: no such target\n");
 				else
-					(tmp2->second.send_message_all_members(*(_param.begin() + 1)));
+				{
+					std::cout << "inside PRIVMSG ELSE 3\n";
+					(tmp2->second.send_message_all_members((*(_param.begin() + 1)) + "\n"));
+				}
 			}
 		}
 	}

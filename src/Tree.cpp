@@ -20,14 +20,16 @@ void Tree::insert_by_nick(std::string& nickname, User* user)
 
 void    Tree::insert(const std::string chan_name)
 {
-	Channel chan;
+	Channel chan(chan_name);
 
 	_chto_channel.insert(std::make_pair(chan_name, chan));
 }
 
 User    *Tree::find_usr_by_nickname(std::string& nickname)
 {
-	return((_user_to_nick.find(nickname))->second);
+	if ((_user_to_nick.find(nickname) != _user_to_nick.end()))
+		return((_user_to_nick.find(nickname))->second);
+	return NULL;
 }
 
 User    *Tree::find_usr_by_fd(int& fd)

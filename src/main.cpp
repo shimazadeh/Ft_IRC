@@ -46,5 +46,8 @@ int	main(int ac, const char **av)
 //nc 127.0.0.1 port#
 
 //QUESTIONS:
-// do we add the number of errors to the msgs?
-//match the error msges exactly as the protocol?
+
+/*
+1. SHIMA NEED TO FIX THE CHANNEL NAME WHEN JOINING 
+2. CTRL D OF THE SERVER ? 
+*/

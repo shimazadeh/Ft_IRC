@@ -1,9 +1,12 @@
 #include "../inc/Channel.hpp"
 
-Channel::Channel(){}
+Channel::Channel(std::string name)
+{
+	_chname = name;
+}
 Channel::~Channel(){}
 
-std::string Channel::get_name(){return (_name);}
+std::string Channel::get_name(){return (_chname);}
 
 std::string &Channel::get_topic(){return (_topic);}
 
@@ -14,11 +17,12 @@ int         Channel::size(){return (_members.size());}
 void    Channel::add_member(User &user)
 {
 	_members.push_back(&user);
+	std::cout <<"size is: " << _members.size() << std::endl;
 }
 
-void    Channel::add_ban(std::string name)
+void    Channel::add_ban(std::string _username)
 {
-	_ban.push_back(name);
+	_ban.push_back(_username);
 }
 
 void    Channel::add_oper(User &user)
@@ -59,11 +63,11 @@ for (iterator_user i = _opers.begin(); i < _opers.end(); i++)
 	return false;
 }
 
-bool    Channel::erase_ban(std::string _name)
+bool    Channel::erase_ban(std::string _username)
 {
 	for (iterator_string i = _ban.begin(); i < _ban.end(); i++)
 	{
-		if ((*i).compare(_name))
+		if ((*i).compare(_username))
 		{
 			_ban.erase(i);
 			return true;
@@ -72,31 +76,32 @@ bool    Channel::erase_ban(std::string _name)
 	return false;
 }
 
-bool    Channel::is_member(std::string _name)
+bool    Channel::is_member(std::string _username)
 {
-	for (iterator_user i = _members.begin(); i != _members.end(); i++)
+	for (size_t i = 0; i != _members.size(); i++)
 	{
-		if (!(*i)->_nickname.compare(_name))
+		std::cout <<"debugg: " << _members[i]->_nickname << ", " << _username << std::endl;
+		if (!_members[i]->_nickname.compare(_username))
 			return true;
 	}
 	return false;
 }
 
-bool    Channel::is_ban(std::string _name)
+bool    Channel::is_ban(std::string _username)
 {
 	for (iterator_string i = _ban.begin(); i != _ban.end(); i++)
 	{
-		if (!(*i).compare(_name))
+		if (!(*i).compare(_username))
 			return true;
 	}
 	return false;
 }
 
-bool    Channel::is_oper(std::string _name)
+bool    Channel::is_oper(std::string _username)
 {
 	for (iterator_user i = _opers.begin(); i != _opers.end(); i++)
 	{
-		if (!(*i)->_nickname.compare(_name))
+		if (!(*i)->_nickname.compare(_username))
 			return true;
 	}
 	return false;

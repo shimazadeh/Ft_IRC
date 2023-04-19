@@ -13,7 +13,7 @@ class Channel
          typedef std::vector<User*>::iterator        iterator_user;
          typedef std::vector<std::string>::iterator  iterator_string;
 
-         Channel();
+         Channel(std::string chname = "");
          ~Channel();
 
          std::string get_name();
@@ -44,7 +44,7 @@ class Channel
          std::vector<User*>          _members;
          std::vector<User*>          _opers;
          std::vector<std::string>    _ban;
-         std::string                 _name;
+         std::string                 _chname;
          std::string                 _topic;
         //do we need to create a limit for the number of users for each channel
  };
