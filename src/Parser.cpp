@@ -28,9 +28,12 @@ int    Parser::check_for_cmd()
 	if (pos == std::string::npos)
 		return (1);
 	_user->_rbuff = (_user->_rbuff).substr(pos + 1);
-	buf = buf.substr(0, pos);
 	if (*buf.begin() != '/')
+	{
+		buf = buf.substr(0, pos);
 		return 1;
+	}
+	buf = buf.substr(1, pos);
 	fill_in_params(buf);
 	return 0;
 }
@@ -225,7 +228,7 @@ bool    Parser::quit()
 		std::vector<Channel*>   ch_tmp = _user->_channels;
 		std::string		reason;
 
-		for (int i = 0; i < _param.size() - 1; i++)
+		for (size_t i = 0; i < _param.size() - 1; i++)
 			reason.append(*(_param.begin() + i) + " ");
 		reason.append(*(_param.begin() + _param.size() - 1) + "\n");
 		_user->erase_me_from_allchannel(_user->_channels);
@@ -260,7 +263,7 @@ void    Parser::part()
 			{
 				std::string reason; 
 
-				for (int i = 1; i < _param.size() - 1; i++)
+				for (size_t i = 1; i < _param.size() - 1; i++)
 					reason.append(*(_param.begin() + i) + " ");
 				reason.append(*(_param.begin() + _param.size() - 1) + "\n");
 				it->second.erase_members(*_user);
