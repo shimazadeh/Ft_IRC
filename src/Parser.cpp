@@ -19,22 +19,18 @@ void    Parser::change_user(User    *username)
 
 User    *Parser::get_user(){return (_user);}
 
-int    Parser::check_for_cmd()
+int    Parser::check_for_cmd(bool& closecon, std::vector<struct pollfd>& _fds)
 {
-	std::string     buf = _user->_rbuff;
-	size_t             pos(0);
+	std::string					buf;
+	size_t						pos(0);
 
-	pos = buf.find("\n");
-	if (pos == std::string::npos)
-		return (1);
-	_user->_rbuff = (_user->_rbuff).substr(pos + 1);
-	if (*buf.begin() != '/')
+	while((pos = _user->_rbuff.find("\r\n")) != std::string::npos)
 	{
-		buf = buf.substr(0, pos);
-		return 1;
+		buf = (_user->_rbuff).substr(0, pos);
+		_user->_rbuff = (_user->_rbuff).substr(pos + 2);
+		fill_in_params(buf);
+		execute(closecon, _fds);
 	}
-	buf = buf.substr(1, pos - 1);
-	fill_in_params(buf);
 	return 0;
 }
 
@@ -76,24 +72,24 @@ std::vector<std::string>    Parser::custom_split(std::string buf)
 
 void    Parser::execute(bool& closecon, std::vector<struct pollfd>& _fds)
 {
-	std::cout << _cmd << std::endl;
+	std::cout << "+++++++++++" << _cmd << std::endl;
 	if (_cmd == "")
 		return ;
 	else if (_cmd.compare("CAP") == 0)
-		return ;
-	if (_cmd.compare("PASS") == 0)
+		cap();
+	else if (_cmd.compare("PASS") == 0)
 		pass();
 	else if (_cmd.compare("QUIT") == 0)
 	{
 		if (quit())
 			closecon = true;
 	}
-	else if (_user->_regstat == 0)
-		(_user->_wbuff).append("Error: the password of the connection is not set\n");
 	else if (_cmd.compare("NICK") == 0)
 		nick();
 	else if (_cmd.compare("USER") == 0)
 		user();
+	// else if (_user->_regstat == 0)
+	// 	(_user->_wbuff).append("Error: the password of the connection is not set\n");
 	else if (_cmd.compare("PING") == 0)
 		ping();
 	else if (_cmd.compare("OPER") == 0)
@@ -118,105 +114,124 @@ void    Parser::execute(bool& closecon, std::vector<struct pollfd>& _fds)
 		(_user->_wbuff).append("Error 421: No such command: " + _cmd + "\n");
 }
 
+void Parser::cap()
+{
+	return ;
+}
+
 void    Parser::pass()//1
 {
 	if (_user->_regstat > 1)
-		(_user->_wbuff).append("PASS: error 461: user is already connected\n");
+	{
+		(_user->_wbuff).append(_user->nickname + " :You may not reregister\n");
+	}
 	else if (_param.size() != 1)
-		(_user->_wbuff).append("PASS: error 462: wrong number of parameters\n");
+	{
+		(_user->_wbuff).append(_user->_nickname + " PASS :Not enough parameters\n");
+	}
 	else if (!(*(_param.begin())).compare(_pass))
+	{
 		_user->_regstat = 1;
+	}
 	else
 	{
 		_user->_regstat = 0;
-		std::cout << "in pass command >>>>> [" << (*(_param.begin())) << "]" << std::endl;
-		(_user->_wbuff).append("PASS: error 464: wrong password, try again !\n");
+		(_user->_wbuff).append(_user->_nickname + " :Password incorrect\n");
 	}
 }
 
 void    Parser::nick()//2
 {
 	if (_user->_regstat == 0)
-		(_user->_wbuff).append("NICK: error: the password of the connection is not set\n");
+	{
+		(_user->_wbuff).append(":You have not registered\n");
+	}
 	else if (_param.size() != 1)
-		(_user->_wbuff).append("NICK: error: invalid number of parameters!\n");
+	{
+		(_user->_wbuff).append(_user->_nickname + " NICK :Not enough parameters\n");
+	}
 	else if (*(_param.begin()) == "")
-		(_user->_wbuff).append("NICK: error 431: empty parameter\n");
+	{
+		(_user->_wbuff).append(":No nickname given\n");
+	}
 	else if (_tree->get_usernick().empty() && _tree->get_usernick().find(*(_param.begin())) != _tree->get_usernick().end())
-		(_user->_wbuff).append("NICK: error 433: nickname is already in use choose a different one\n");
+	{
+		(_user->_wbuff).append(_user->_nickname + " :Nickname is already in use\n");
+	}
 	else if (_tree->get_usernick().empty() && _tree->get_channel().find(*(_param.begin())) != _tree->get_channel().end())
-		(_user->_wbuff).append("NICK: error 433: nickname is already in the network\n");
+	{
+		(_user->_wbuff).append(_user->_nickname + " :Nickname is already in use\n");
+	}	
 	else
 	{
-		(_user->_wbuff).append("You changed your nickname to " + *(_param.begin()) + "\n");
+		//(_user->_wbuff).append("You changed your nickname to " + *(_param.begin()) + "\n");
 		if (_user->_nickname != "")
 			_tree->get_usernick().erase(_user->_nickname);
 		if (_user->_regstat != 3)
 			_user->_regstat = 2;
 		_user->_nickname = *(_param.begin());
 		_tree->insert_by_nick(_user->_nickname, _user);
-		std::cout << _tree->_user_to_nick.size() << std::endl;
 	}
 }
 
 void    Parser::user()
 {
-	if (_user->_regstat == 0)
-		(_user->_wbuff).append("USER: error: the password of the connection is not set\n");
+	if (_user->_regstat == 0 || _user->_regstat != 2)
+	{
+		(_user->_wbuff).append(":You have not registered\n");
+	}
 	else if (_user->_regstat == 3)
-		(_user->_wbuff).append("USER: error: the registration is already completed\n");
-	else if (_user->_regstat != 2)
-		(_user->_wbuff).append("USER: error: wrong registration step, nickname is not set\n");
-	else if (_param.size() != 4)
-		(_user->_wbuff).append("USER: error: invalid number of parameters!\n");
-	else if (_user->_regstat == 3)
-		(_user->_wbuff).append("USER: error: the user is already registered\n");
-	else if (*(_param.begin()) == "" || *(_param.begin() + 3) == "")
-		(_user->_wbuff).append("USER: error: empty parameters!\n");
-	else if (*(_param.begin() + 1) == "0" || *(_param.begin() + 2) == "*")
-		(_user->_wbuff).append("USER: error: invalid parameters!\n");
+	{
+		(_user->_wbuff).append(_user->nickname + " :You may not reregister\n");
+	}
+	else if (_param.size() != 4 || *(_param.begin()) == "" || *(_param.begin() + 3) == "")
+	{
+		(_user->_wbuff).append(_user->_nickname + " USER :Not enough parameters\n");
+	}
+	//else if (*(_param.begin() + 1) == "0" || *(_param.begin() + 2) == "*")
+	//	(_user->_wbuff).append("USER: error: invalid parameters!\n");
 	else
 	{
 		_user->_regstat = 3;
 		_user->_username = *(_param.begin());
 		for (size_t i = 3; i < _param.size(); i++)//added for: parsing problem: the last param could have space
 			(_user->_realname).append(*(_param.begin() + i));
-		(_user->_wbuff).append("User gets registered with user name: " + _user->_username + " and real name: " + _user->_realname + "\n");
+		(_user->_wbuff).append(":irssiserv 001 " + _user->_nickname + " :Welcome to the IRC Network, " + _user->_nickname + "!" + _user->_username + "@" + (*(_param.begin() + 2)) + "\n");
+		(_user->_wbuff).append(_user->_nickname + " :Your host is irssiserv 001, running version 3\n");
+		(_user->_wbuff).append(_user->_nickname + " irssiserv 001 1 0 0\n");
+
 	}
 }
 
 void    Parser::ping()
 {
 	if (_user->_regstat != 3)
-		(_user->_wbuff).append("PING: error: user is not registered\n");
-	else if (_param.size() != 1)
-		(_user->_wbuff).append("PING: error : invalid number of parameters!\n");
-	else if (*(_param.begin()) == "")
-		(_user->_wbuff).append("PING: error: empty parameter\n");
+		(_user->_wbuff).append(":You have not registered\n");
+	else if (_param.size() != 1 || *(_param.begin()) == "")
+		(_user->_wbuff).append(_user->_nickname + " PING :Not enough parameters\n");
 	else
 		(_user->_wbuff).append("PONG " + *(_param.begin()) + "\n");
 }
 
 void    Parser::oper()//we choose to use our own password
 {
-	(_user->_wbuff).append("OPER: Attempt to register as an operator using a name of [" + *(_param.begin()) + "] and the password [" + *(_param.begin() + 1) + "]\n");
 	if (_user->_regstat != 3)
-		(_user->_wbuff).append("OPER: error: user is not registered\n");
+		(_user->_wbuff).append(":You have not registered\n");
 	else if (_param.size() != 2)
-		(_user->_wbuff).append("OPER: error 461: invalid number of parameters!\n");
+		(_user->_wbuff).append(_user->_nickname + " OPER :Not enough parameters\n");
 	else if (!(*(_param.begin())).compare(_pass))
-		(_user->_wbuff).append("OPER: error: incorrect password!\n");
-	else if (!(*(_param.begin() + 1)).compare(_user->_username))
-		(_user->_wbuff).append("OPER: error: incorrect username!\n");
+		(_user->_wbuff).append(_user->_nickname + " :Password incorrect\n");
+	// else if (!(*(_param.begin() + 1)).compare(_user->_username))
+	// 	(_user->_wbuff).append("OPER: error: incorrect username!\n");
 	else
 	{
 		if (_user->_nickname == (*(_param.begin() + 1)))
 		{
 			_user->_opstat = 1;
-			(_user->_wbuff).append("You are now an IRC operator\n");
+			(_user->_wbuff).append(":You are now an IRC operator\n");
 		}
-		else
-			(_user->_wbuff).append("OPER: error: You can only OPER yourself\n");
+		// else
+		// 	(_user->_wbuff).append("OPER: error: You can only OPER yourself\n");
 	}
 }
 
@@ -224,7 +239,7 @@ bool    Parser::quit()
 {
 	if (_param.size() < 1)
 	{
-		(_user->_wbuff).append("QUIT: error: invalid number of parameters!\n");
+		(_user->_wbuff).append(_user->_nickname + " QUIT :Not enough parameters\n");
 		return (0);
 	}
 	else
@@ -246,11 +261,9 @@ bool    Parser::quit()
 void    Parser::part()
 {
 	if (_user->_regstat != 3)
-		(_user->_wbuff).append("PART: error: user is not registered\n");
-	else if (_param.size() < 2)
-		(_user->_wbuff).append("PART: error: invalid number of parameters!\n");
-	else if (*(_param.begin()) == "" || *(_param.begin() + 1) == "")
-		(_user->_wbuff).append("PART: error: wrong parameters\n");
+		(_user->_wbuff).append(":You have not registered\n");
+	else if (_param.size() < 2 || *(_param.begin()) == "" || *(_param.begin() + 1) == "")
+		(_user->_wbuff).append(_user->_nickname + " PART :Not enough parameters\n");
 	else
 	{
 		std::vector<std::string>    params = custom_split(*(_param.begin()));
@@ -260,9 +273,9 @@ void    Parser::part()
 			std::map<std::string, Channel>::iterator    it = _tree->get_channel().find(*(params.begin() + i));
 
 			if (it == _tree->get_channel().end())
-				(_user->_wbuff).append("PART: error: channel " + *(params.begin() + i) + " does not exist\n");
+				(_user->_wbuff).append((*(params.begin() + i)) + " :No such channel\n");
 			else if (!(it->second).is_member(_user->_nickname))
-				(_user->_wbuff).append("PART: error: user is not in the channel\n");
+				(_user->_wbuff).append((*(_param.begin() + i)) + ": You're not on that channel\n");
 			else
 			{
 				std::string reason; 
@@ -284,28 +297,28 @@ void    Parser::topic()
 	std::map<std::string, Channel>::iterator it = _tree->get_channel().find(*(_param.begin()));
 
 	if (_user->_regstat != 3)
-		(_user->_wbuff).append("TOPIC: error: user is not registered\n");
-	else if (_param.size() < 1 || _param.size() > 2)
-		(_user->_wbuff).append("TOPIC: invalid number of parameters!\n");
-	else if (*(_param.begin()) == "")
-		(_user->_wbuff).append("TOPIC: error: channel parameter cannot be empty\n");
+		(_user->_wbuff).append(":You have not registered\n");
+	else if (_param.size() < 1 || _param.size() > 2 || *(_param.begin()) == "")
+		(_user->_wbuff).append(_user->_nickname + " TOPIC :Not enough parameters\n");
 	else if (!it->second.is_member(_user->_nickname))
-		(_user->_wbuff).append("TOPIC: error: you are not the member of the channel\n");
+		(_user->_wbuff).append((*(_param.begin())) + ": You're not on that channel\n");
 	else if (it != _tree->get_channel().end())
 	{
 		if (*(_param.begin() + 1) == "")
 		{
 			if (it->second.get_topic() == "")
-				(_user->_wbuff).append("TOPIC: there is no topic\n");
+				(_user->_wbuff).append((*(_param.begin())) + " :No topic is set\n");
 			else
 				(_user->_wbuff).append("TOPIC: current topic of the channel is : " + it->second.get_topic() + "\n");
 		}
+		else if (_user->_opstat != 1)// change the condition to channel mode admin
+			(_user->_wbuff).append((*(params.begin())) + " :You're not channel operator\n");
 		else
 			it->second.send_message_all_members("TOPIC: the topic of the channel has been changed to " + (*(_param.begin() + 1)) + "\n");
 		it->second.get_topic() = *(_param.begin() + 1);
 	}
 	else
-		(_user->_wbuff).append("TOPIC: error: channel does not exist\n");
+		(_user->_wbuff).append((*(params.begin())) + " :No such channel\n");
 
 }
 
@@ -314,13 +327,11 @@ void    Parser::invite()
 	std::map<std::string, Channel>::iterator it = _tree->get_channel().find(*(_param.begin() + 1));
 
 	if (_user->_regstat != 3)
-		(_user->_wbuff).append("INVITE: error: user is not registered\n");
-	else if (_param.size() != 2)
-		(_user->_wbuff).append("INVITE: invalid number of parameters!\n");
-	else if (*(_param.begin()) == "" || *(_param.begin() + 1) == "")
-		(_user->_wbuff).append("INVITE: error: empty parameters\n");
+		(_user->_wbuff).append(":You have not registered\n");
+	else if (_param.size() != 2 || *(_param.begin()) == "" || *(_param.begin() + 1) == "")
+		(_user->_wbuff).append(_user->_nickname + " INVITE :Not enough parameters\n");
 	else if (!it->second.is_member(_user->_nickname))
-		(_user->_wbuff).append("INVITE: error: You're not on that channel\n");
+		(_user->_wbuff).append((*(_param.begin() + 1)) + ": You're not on that channel\n");
 	else if (it != _tree->get_channel().end())
 	{
 		if (it->second.size() < 1)
@@ -344,7 +355,7 @@ void    Parser::kick()
 	std::map<std::string, Channel>::iterator it = _tree->get_channel().find((*_param.begin()));
 
 	if (_user->_regstat != 3)
-		(_user->_wbuff).append("KICK: error: user is not registered\n");
+		(_user->_wbuff).append(":You have not registered\n");
 	else if (_param.size() != 2)//limiting one user per kick our choise
 		(_user->_wbuff).append("KICK: invalid number of parameters!\n");
 	else if (*(_param.begin()) == "" || *(_param.begin() + 1) == "")
@@ -372,7 +383,7 @@ void    Parser::join()
 	std::map<std::string, Channel>::iterator it = _tree->get_channel().find(_param[0]);
 
 	if (_user->_regstat != 3)
-		(_user->_wbuff).append("JOIN: error: user is not registered\n");
+		(_user->_wbuff).append(":You have not registered\n");
 	else if (_param.size() < 1)
 		(_user->_wbuff).append("JOIN: error: invalid number of parameters!\n");
 	else if (*(_param.begin()) == "")
@@ -403,7 +414,7 @@ void    Parser::join()
 void    Parser::privmsg()
 {
 	if (_user->_regstat != 3)
-		(_user->_wbuff).append("PRIVMSG: error: user is not registered\n");
+		(_user->_wbuff).append(":You have not registered\n");
 	else if (_param.size() < 2)
 		(_user->_wbuff).append("PRIVMSG: error: invalid number of parameters!\n");
 	else if (*(_param.begin()) == "" || *(_param.begin() + 1) == "")
@@ -435,7 +446,7 @@ void    Parser::privmsg()
 void    Parser::notice()//dont really know the intention BUT we need to make it different from privmsg
 {
 	if (_user->_regstat != 3)
-		(_user->_wbuff).append("NOTICE: error: user is not registered\n");
+		(_user->_wbuff).append(":You have not registered\n");
 	else if (_param.size() < 2)
 		(_user->_wbuff).append("NOTICE: error: invalid number of parameters!\n");
 	else if (*(_param.begin()) == "" || *(_param.begin() + 1) == "")

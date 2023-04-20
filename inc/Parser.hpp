@@ -17,12 +17,13 @@ class Parser
 
         void                        change_user(User    *username);
         User                        *get_user();
-        int                         check_for_cmd();
+        int                         check_for_cmd(bool& closecon, std::vector<struct pollfd>& _fds);
         void                        fill_in_params(std::string  buf);
         std::vector<std::string>    custom_split(std::string buf);
 
         void    execute(bool& closecon, std::vector<struct pollfd>& _fds);
         void    pass();
+        void    cap();
         void    nick();
         void    user();
         void    ping();

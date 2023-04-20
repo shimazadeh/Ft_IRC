@@ -103,12 +103,10 @@ void    Server::loop()
 				case 4:
 					std::cout << "Poll(), incorrect revents" << std::endl;
 					user_ref = _tree.find_usr_by_fd(_fds[i].fd);
-					memcpy(_buffer, "QUIT unexpected_quit\n", 22);
+					memcpy(_buffer, "QUIT unexpected_quit\r\n", 22);
 					_par.change_user(user_ref);
 					user_ref->_rbuff.append(_buffer);
-					if (!_par.check_for_cmd())
-						_par.execute(_closscon, _fds);
-					std::cout << "FUCCCCC\n";
+					_par.check_for_cmd(_closscon, _fds);
 					break ;
 				default:
 					break ;
@@ -132,11 +130,10 @@ void    Server::loop()
 				case 4:
 					std::cout << "Poll(), incorrect revents" << std::endl;
 					user_ref = _tree.find_usr_by_fd(_fds[i].fd);
-					memcpy(_buffer, "QUIT unexpected_quit\n", 22);
+					memcpy(_buffer, "QUIT unexpected_quit\r\n", 22);
 					_par.change_user(user_ref);
 					user_ref->_rbuff.append(_buffer);
-					if (!_par.check_for_cmd())
-						_par.execute(_closscon, _fds);
+					_par.check_for_cmd(_closscon, _fds);
 					break ;
 				default:
 					break ;
@@ -180,6 +177,7 @@ void    Server::handle_client_read(size_t &i)
 	{
 		memset(_buffer, 0, sizeof(char) * BUFFER_SIZE);
 		_ret = recv(_fds[i].fd, _buffer, BUFFER_SIZE, 0);
+		std::cout << "BUFFER --------> " << _buffer << std::endl;
 		if (_ret < 0)
 		{
 			if (errno == EWOULDBLOCK)
@@ -193,24 +191,23 @@ void    Server::handle_client_read(size_t &i)
 			_closscon = true;
 		}
 		if (_ret <= 0)
-			memcpy(_buffer, "QUIT\n", 6);
+			memcpy(_buffer, "QUIT unexpected_quit\r\n", 6);
 		(_par.get_user())->_rbuff.append(_buffer);
 	}
-	if (!_par.check_for_cmd())
-		_par.execute(_closscon, _fds);
+	_par.check_for_cmd(_closscon, _fds);
 }
 
 void    Server::handle_client_write(size_t &i)
 {
 	User* user_ref = _tree.find_usr_by_fd(_fds[i].fd);
+	std::cout << "wbuff ->" << user_ref->_wbuff << std::endl;
 	_ret = send(_fds[i].fd, &(user_ref->_wbuff)[0], user_ref->_wbuff.size(), 0);
 	if (_ret == -1)
 	{
-		memcpy(_buffer, "QUIT\n", 6);
+		memcpy(_buffer, "QUIT unexpected_quit\r\n", 6);
 		_par.change_user(user_ref);
 		user_ref->_rbuff.append(_buffer);
-		if (!_par.check_for_cmd())
-			_par.execute(_closscon, _fds);
+		_par.check_for_cmd(_closscon, _fds);
 		return ;
 	}
 	user_ref->_wbuff = (user_ref->_wbuff).substr(_ret);

@@ -26,6 +26,7 @@
 // #include "Channel.hpp"
 
 
-#define TIMEOUT 3
+#define TIMEOUT 10
 #define BUFFER_SIZE 100
+#define SERVER_NAME ircserv
 #endif
