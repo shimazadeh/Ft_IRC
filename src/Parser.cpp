@@ -186,7 +186,7 @@ void    Parser::user()
 	{
 		(_user->_wbuff).append(_user->_nickname + " :You may not reregister\n");
 	}
-	else if (_param.size() != 4 || *(_param.begin()) == "" || *(_param.begin() + 3) == "")
+	else if (_param.size() < 4 || *(_param.begin()) == "" || *(_param.begin() + 3) == "")
 	{
 		(_user->_wbuff).append(_user->_nickname + " USER :Not enough parameters\n");
 	}
@@ -434,14 +434,21 @@ void    Parser::privmsg()
 			else
 			{
 				std::map<std::string, Channel>::iterator tmp2 = _tree->find_channel(*(targets.begin() + i));
+				std::string		msg;
+
+				for (size_t i = 1; i != _param.size() - 1; i++)
+					msg.append(*(_param.begin() + i) + " ");
+				msg.append(*(_param.begin() + _param.size() - 1));
 				std::cout << tmp2->second.get_name() << std::endl;
+				
 				if (tmp2 == _tree->get_channel().end())
 					(_user->_wbuff).append(*(_param.begin() + i) + " :No such nick/channel\n");
 				else if (!tmp2->second.is_member(_user->_nickname))
-					(_user->_wbuff).append(*(_param.begin() + 1) + " :You're not on that channel\n");
+					(_user->_wbuff).append(*(_param.begin() + i) + " :You're not on that channel\n");
 				else
 				{
-					(tmp2->second.send_message_all_members((*(_param.begin() + 1)) + "\n"));
+					std::cout << "SENDING MSG TO ALL MEMBERS\n";
+					(tmp2->second.send_message_all_members(":" + _user->_nickname + " MSG " + (msg) + "\n"));
 				}
 			}
 		}
