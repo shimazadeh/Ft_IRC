@@ -7,7 +7,7 @@ std::map<std::string, Channel>  &Tree::get_channel(){return (_chto_channel);}
 std::map<std::string, User*>    &Tree::get_usernick(){return (_user_to_nick);}
 std::map<int, User*>            &Tree::get_userfd(){return (_user_to_fd);}
 
-void    Tree::insert_by_fd(int    &fd)
+void    Tree::insert_by_fd(int    fd)
 {
 	User    *user = new User("", fd);
 	_user_to_fd.insert(std::make_pair(fd, user));
@@ -44,9 +44,15 @@ std::map<std::string, Channel>::iterator Tree::find_channel(std::string& channel
 
 void    Tree::erase_user(User &user)
 {
+	std::cout << _user_to_nick.size() << std::endl;
+	std::cout << _user_to_fd.size() << std::endl;
+	std::cout << "check2: " << user._fd << std::endl;
 	_user_to_nick.erase(user._nickname);
 	_user_to_fd.erase(user._fd);
 	user.erase_me_from_allchannel();
+
+	std::cout << _user_to_nick.size() << std::endl;
+	std::cout << _user_to_fd.size() << std::endl;
 
 	return ;
 }

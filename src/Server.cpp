@@ -36,6 +36,7 @@ void    Server::set_up()
 	int on = 1;
 
 	_tmpfd.fd = socket(AF_INET6, SOCK_STREAM, 0);
+	
 	if (_tmpfd.fd < 0)
 	{
 		perror("socket() failed");
@@ -43,7 +44,7 @@ void    Server::set_up()
 	}
 
 	_fds.push_back(_tmpfd);
-
+	std::cout << "ls " << _fds[0].fd << std::endl;
 	_ret = setsockopt(_fds[0].fd, SOL_SOCKET, SO_REUSEADDR, (char *)&on, sizeof(on));
 	if (_ret < 0)
 	{
@@ -177,7 +178,6 @@ void    Server::handle_client_read(size_t &i)
 	{
 		memset(_buffer, 0, sizeof(char) * BUFFER_SIZE);
 		_ret = recv(_fds[i].fd, _buffer, BUFFER_SIZE, 0);
-		std::cout << "BUFFER --------> " << _buffer << std::endl;
 		if (_ret < 0)
 		{
 			if (errno == EWOULDBLOCK)
@@ -194,13 +194,14 @@ void    Server::handle_client_read(size_t &i)
 			memcpy(_buffer, "QUIT unexpected_quit\r\n", 6);
 		(_par.get_user())->_rbuff.append(_buffer);
 	}
+	std::cout << "read -> " << (_par.get_user())->_rbuff << std::endl;
 	_par.check_for_cmd(_closscon, _fds);
 }
 
 void    Server::handle_client_write(size_t &i)
 {
 	User* user_ref = _tree.find_usr_by_fd(_fds[i].fd);
-	std::cout << "wbuff ->" << user_ref->_wbuff << std::endl;
+	std::cout << "wrote -> " << user_ref->_wbuff << std::endl;
 	_ret = send(_fds[i].fd, &(user_ref->_wbuff)[0], user_ref->_wbuff.size(), 0);
 	if (_ret == -1)
 	{
@@ -219,6 +220,9 @@ void    Server::handle_lsocket_read()
 	while (_tmpfd.fd != -1)
 	{
 		_tmpfd.fd = accept(_fds[0].fd, NULL, NULL);
+		if (_fds[0].revents == POLLIN)
+			std::cout << _fds[0].fd << "sth to read\n";
+		std::cout << "check3: " << _tmpfd.fd << std::endl;
 		if (_tmpfd.fd < 0)
 		{
 			if (errno != EWOULDBLOCK)
@@ -239,5 +243,6 @@ void    Server::handle_lsocket_read()
 		_tmpfd.events = POLLIN;
 		_fds.push_back(_tmpfd);
 		_tree.insert_by_fd(_tmpfd.fd);
+		std::cout << "check1: " << _tmpfd.fd << std::endl;
 	}
 }

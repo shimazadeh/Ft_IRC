@@ -8,7 +8,6 @@ User::User(int fd):_fd(fd)
 	_wbuff = "";
 	_rbuff = "";
 	_regstat = 0;
-	_fd = -1;
 	_opstat = false;
 }
 
@@ -19,7 +18,6 @@ User::User(std::string nick_name, int fd): _nickname(nick_name), _fd(fd)
 	_wbuff = "";
 	_rbuff = "";
 	_regstat = 0;
-	_fd = -1;
 	_opstat = false;
 }
 

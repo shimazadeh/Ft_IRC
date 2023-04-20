@@ -21,7 +21,7 @@ class Tree
         std::map<std::string, User*>    &get_usernick();
         std::map<int, User*>            &get_userfd();
 
-        void    insert_by_fd(int    &fd);
+        void    insert_by_fd(int    fd);
         void    insert(const std::string chan_name);
         void    insert_by_nick(std::string& nickname, User* user);
         User    *find_usr_by_nickname(std::string& nickname);
