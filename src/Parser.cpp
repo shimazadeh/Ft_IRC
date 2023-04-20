@@ -24,7 +24,7 @@ int    Parser::check_for_cmd()
 	std::string     buf = _user->_rbuff;
 	size_t             pos(0);
 
-	pos = buf.find("\r\n");
+	pos = buf.find("\n");
 	if (pos == std::string::npos)
 		return (1);
 	_user->_rbuff = (_user->_rbuff).substr(pos + 1);
@@ -33,7 +33,7 @@ int    Parser::check_for_cmd()
 		buf = buf.substr(0, pos);
 		return 1;
 	}
-	buf = buf.substr(1, pos);
+	buf = buf.substr(1, pos - 1);
 	fill_in_params(buf);
 	return 0;
 }
@@ -76,7 +76,10 @@ std::vector<std::string>    Parser::custom_split(std::string buf)
 
 void    Parser::execute(bool& closecon, std::vector<struct pollfd>& _fds)
 {
+	std::cout << _cmd << std::endl;
 	if (_cmd == "")
+		return ;
+	else if (_cmd.compare("CAP") == 0)
 		return ;
 	if (_cmd.compare("PASS") == 0)
 		pass();
@@ -126,6 +129,7 @@ void    Parser::pass()//1
 	else
 	{
 		_user->_regstat = 0;
+		std::cout << "in pass command >>>>> [" << (*(_param.begin())) << "]" << std::endl;
 		(_user->_wbuff).append("PASS: error 464: wrong password, try again !\n");
 	}
 }
