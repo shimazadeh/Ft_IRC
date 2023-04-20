@@ -107,7 +107,7 @@ void    Server::loop()
 					_par.change_user(user_ref);
 					user_ref->_rbuff.append(_buffer);
 					if (!_par.check_for_cmd())
-						_par.execute(_closscon);
+						_par.execute(_closscon, _fds);
 					std::cout << "FUCCCCC\n";
 					break ;
 				default:
@@ -136,7 +136,7 @@ void    Server::loop()
 					_par.change_user(user_ref);
 					user_ref->_rbuff.append(_buffer);
 					if (!_par.check_for_cmd())
-						_par.execute(_closscon);
+						_par.execute(_closscon, _fds);
 					break ;
 				default:
 					break ;
@@ -197,7 +197,7 @@ void    Server::handle_client_read(size_t &i)
 		(_par.get_user())->_rbuff.append(_buffer);
 	}
 	if (!_par.check_for_cmd())
-		_par.execute(_closscon);
+		_par.execute(_closscon, _fds);
 }
 
 void    Server::handle_client_write(size_t &i)
@@ -210,7 +210,7 @@ void    Server::handle_client_write(size_t &i)
 		_par.change_user(user_ref);
 		user_ref->_rbuff.append(_buffer);
 		if (!_par.check_for_cmd())
-			_par.execute(_closscon);
+			_par.execute(_closscon, _fds);
 		return ;
 	}
 	user_ref->_wbuff = (user_ref->_wbuff).substr(_ret);

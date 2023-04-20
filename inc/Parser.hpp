@@ -21,7 +21,7 @@ class Parser
         void                        fill_in_params(std::string  buf);
         std::vector<std::string>    custom_split(std::string buf);
 
-        void    execute(bool& closecon);
+        void    execute(bool& closecon, std::vector<struct pollfd>& _fds);
         void    pass();
         void    nick();
         void    user();
@@ -35,7 +35,7 @@ class Parser
         void    join();
         void    privmsg();
         void    notice();
-        void    kill();
+        void    kill(std::vector<struct pollfd>& _fds);
 
     private:
         std::string                  _cmd;

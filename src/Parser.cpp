@@ -24,11 +24,13 @@ int    Parser::check_for_cmd()
 	std::string     buf = _user->_rbuff;
 	size_t             pos(0);
 
-	pos = buf.find("\n");
+	pos = buf.find("\r\n");
 	if (pos == std::string::npos)
 		return (1);
 	_user->_rbuff = (_user->_rbuff).substr(pos + 1);
 	buf = buf.substr(0, pos);
+	if (*buf.begin() != '/')
+		return 1;
 	fill_in_params(buf);
 	return 0;
 }
@@ -69,7 +71,7 @@ std::vector<std::string>    Parser::custom_split(std::string buf)
 	return (res);
 }
 
-void    Parser::execute(bool& closecon)
+void    Parser::execute(bool& closecon, std::vector<struct pollfd>& _fds)
 {
 	if (_cmd == "")
 		return ;
@@ -105,7 +107,7 @@ void    Parser::execute(bool& closecon)
 	else if (_cmd.compare("NOTICE") == 0)
 		notice();
 	else if (_cmd.compare("KILL") == 0)
-		kill();
+		kill(_fds);
 	else
 		(_user->_wbuff).append("Error 421: No such command: " + _cmd + "\n");
 }
@@ -211,7 +213,7 @@ void    Parser::oper()//we choose to use our own password
 	}
 }
 
-bool    Parser::quit(
+bool    Parser::quit()
 {
 	if (_param.size() < 1)
 	{
@@ -453,7 +455,7 @@ void    Parser::notice()//dont really know the intention BUT we need to make it 
 	}
 }
 
-void	Parser::kill()
+void   Parser::kill(std::vector<struct pollfd>& _fds)
 {
 	if (_param.size() != 2)
 		(_user->_wbuff).append("KILL: error: invalid number of parameters\n");
@@ -463,10 +465,23 @@ void	Parser::kill()
 		(_user->_wbuff).append("KILL: error: you dont have operator privileges\n");
 	else
 	{
+		int i = 0;
+		while (_fds[i].fd != (_tree->find_usr_by_nickname(*(_param.begin()))->_fd))
+			++i;
+		close(_fds[i].fd);
+		_fds.erase(_fds.begin() + i);
+		_fds.erase(_fds.begin() + i - 1);
+		std::vector<Channel*>   ch_tmp = _user->_channels;
+		std::string		reason;
 
+		_param.clear();
+		_param.push_back("kill");
+		reason.append(*(_param.begin()) + "\n");
+		_user->erase_me_from_allchannel(_user->_channels);
+		_tree->erase_user(*_user);
+		for (size_t i = 0; i < ch_tmp.size(); i++)
+			ch_tmp[i]->send_message_all_members("QUIT: " + _user->_nickname + " has left the channel " + reason + "\n");
 	}
-
-
 }
 
 
