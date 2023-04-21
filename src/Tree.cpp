@@ -44,16 +44,9 @@ std::map<std::string, Channel>::iterator Tree::find_channel(std::string& channel
 
 void    Tree::erase_user(User &user)
 {
-	std::cout << _user_to_nick.size() << std::endl;
-	std::cout << _user_to_fd.size() << std::endl;
-	std::cout << "check2: " << user._fd << std::endl;
 	_user_to_nick.erase(user._nickname);
 	_user_to_fd.erase(user._fd);
 	user.erase_me_from_allchannel();
-
-	std::cout << _user_to_nick.size() << std::endl;
-	std::cout << _user_to_fd.size() << std::endl;
-
 	return ;
 }
 

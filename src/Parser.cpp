@@ -89,6 +89,8 @@ void    Parser::execute(bool& closecon, std::vector<struct pollfd>& _fds)
 		user();
 	else if (_cmd.compare("PING") == 0)
 		ping();
+	else if (_cmd.compare("MODE") == 0)
+		return ;
 	else if (_cmd.compare("OPER") == 0)
 		oper();
 	else if (_cmd.compare("PART") == 0)
@@ -105,7 +107,7 @@ void    Parser::execute(bool& closecon, std::vector<struct pollfd>& _fds)
 		privmsg();
 	else if (_cmd.compare("NOTICE") == 0)
 		notice();
-	else if (_cmd.compare("KILL") == 0)
+	else if (_cmd.compare("kill") == 0)
 		kill(_fds);
 	else
 		(_user->_wbuff).append("Error 421: No such command: " + _cmd + "\n");
@@ -116,11 +118,10 @@ void Parser::cap()
 	return ;
 }
 
-void    Parser::pass()//1
+void    Parser::pass()
 {
 	if (_user->_regstat > 1)
 	{
-		std::cout << "PASS\n" << std::endl;
 		(_user->_wbuff).append(_user->_nickname + " :You may not reregister\n");
 	}
 	else if (_param.size() != 1)
@@ -141,10 +142,7 @@ void    Parser::pass()//1
 void    Parser::nick()//2
 {
 	if (_user->_regstat == 0)
-	{
-		std::cout << "NICK\n" << std::endl;
 		(_user->_wbuff).append(":You have not registered\n");
-	}
 	else if (_param.size() != 1)
 	{
 		(_user->_wbuff).append(_user->_nickname + " NICK :Not enough parameters\n");
@@ -166,7 +164,6 @@ void    Parser::nick()//2
 		(_user->_wbuff).append("You changed your nickname to " + *(_param.begin()) + "\n");
 		if (_user->_nickname != "")
 			_tree->get_usernick().erase(_user->_nickname);
-		std::cout << "map size: " << _tree->get_usernick().size() << ", user_fd: " << _tree->get_userfd().size() << std::endl;
 		if (_user->_regstat != 3)
 			_user->_regstat = 2;
 		_user->_nickname = *(_param.begin());
@@ -178,10 +175,7 @@ void    Parser::nick()//2
 void    Parser::user()
 {
 	if (_user->_regstat == 0 || _user->_regstat != 2)
-	{
-		std::cout << "USER\n" << std::endl;
 		(_user->_wbuff).append(":You have not registered\n");
-	}
 	else if (_user->_regstat == 3)
 	{
 		(_user->_wbuff).append(_user->_nickname + " :You may not reregister\n");
@@ -227,7 +221,7 @@ void    Parser::oper()//we choose to use our own password
 	// 	(_user->_wbuff).append("OPER: error: incorrect username!\n");
 	else
 	{
-		if (_user->_nickname == (*(_param.begin() + 1)))
+		if (_user->_nickname == (*(_param.begin())))
 		{
 			_user->_opstat = 1;
 			(_user->_wbuff).append(":You are now an IRC operator\n");
@@ -249,7 +243,6 @@ bool    Parser::quit()
 		std::vector<Channel*>   ch_tmp = _user->_channels;
 		std::string		reason;
 
-		std::cout << "IM HERE" << std::endl;
 		for (size_t i = 0; i < _param.size() - 1; i++)
 			reason.append(*(_param.begin() + i) + " ");
 		reason.append(*(_param.begin() + _param.size() - 1) + "\n");
@@ -438,18 +431,13 @@ void    Parser::privmsg()
 
 				for (size_t i = 1; i != _param.size() - 1; i++)
 					msg.append(*(_param.begin() + i) + " ");
-				msg.append(*(_param.begin() + _param.size() - 1));
-				std::cout << tmp2->second.get_name() << std::endl;
-				
+				msg.append(*(_param.begin() + _param.size() - 1));				
 				if (tmp2 == _tree->get_channel().end())
 					(_user->_wbuff).append(*(_param.begin() + i) + " :No such nick/channel\n");
 				else if (!tmp2->second.is_member(_user->_nickname))
 					(_user->_wbuff).append(*(_param.begin() + i) + " :You're not on that channel\n");
 				else
-				{
-					std::cout << "SENDING MSG TO ALL MEMBERS\n";
 					(tmp2->second.send_message_all_members(":" + _user->_nickname + " MSG " + (msg) + "\n"));
-				}
 			}
 		}
 	}
@@ -500,21 +488,22 @@ void   Parser::kill(std::vector<struct pollfd>& _fds)
 	else
 	{
 		int i = 0;
-		while (_fds[i].fd != (_tree->find_usr_by_nickname(*(_param.begin()))->_fd))
+		User* killed = _tree->find_usr_by_nickname(*(_param.begin()));
+		while (_fds[i].fd != killed->_fd)
 			++i;
 		close(_fds[i].fd);
+		_fds.erase(_fds.begin() + i + 1);
 		_fds.erase(_fds.begin() + i);
-		_fds.erase(_fds.begin() + i - 1);
-		std::vector<Channel*>   ch_tmp = _user->_channels;
+		std::vector<Channel*>   ch_tmp = killed->_channels;
 		std::string		reason;
 
 		_param.clear();
 		_param.push_back("kill");
 		reason.append(*(_param.begin()) + "\n");
-		_user->erase_me_from_allchannel(_user->_channels);
-		_tree->erase_user(*_user);
+		killed->erase_me_from_allchannel(killed->_channels);
+		_tree->erase_user(*killed);
 		for (size_t i = 0; i < ch_tmp.size(); i++)
-			ch_tmp[i]->send_message_all_members("QUIT: " + _user->_nickname + " has left the channel " + reason + "\n");
+			ch_tmp[i]->send_message_all_members("QUIT: " + *(_param.begin()) + " has left the channel " + reason + "\n");
 	}
 }
 

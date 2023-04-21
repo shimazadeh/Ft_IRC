@@ -44,7 +44,6 @@ void    Server::set_up()
 	}
 
 	_fds.push_back(_tmpfd);
-	std::cout << "ls " << _fds[0].fd << std::endl;
 	_ret = setsockopt(_fds[0].fd, SOL_SOCKET, SO_REUSEADDR, (char *)&on, sizeof(on));
 	if (_ret < 0)
 	{
@@ -142,17 +141,15 @@ void    Server::loop()
 			if (_closscon)
 			{
 				close(_fds[i].fd);
-				_fds.erase(_fds.begin() + i);
 				_fds.erase(_fds.begin() + i + 1);
+				_fds.erase(_fds.begin() + i);
 				_closscon = false;
 			}
 		}
 		for (size_t i = 1; i < _fds.size(); i += 2)
 		{
 			if (((_tree.find_usr_by_fd(_fds[i].fd))->_wbuff).empty())
-			{
 				_fds[i].events = 0;
-			}
 			else
 				_fds[i].events = POLLOUT;
 		}
@@ -220,9 +217,6 @@ void    Server::handle_lsocket_read()
 	while (_tmpfd.fd != -1)
 	{
 		_tmpfd.fd = accept(_fds[0].fd, NULL, NULL);
-		if (_fds[0].revents == POLLIN)
-			std::cout << _fds[0].fd << "sth to read\n";
-		std::cout << "check3: " << _tmpfd.fd << std::endl;
 		if (_tmpfd.fd < 0)
 		{
 			if (errno != EWOULDBLOCK)
