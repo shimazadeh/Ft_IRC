@@ -281,9 +281,9 @@ void    Parser::part()
 				reason.append(*(_param.begin() + _param.size() - 1) + "\n");
 				it->second.erase_members(*_user);
 				it->second.send_message_all_members("PART: " + _user->_nickname + " has left the channel " + reason + "\n");
+				if (it->second.size() == 0)
+					_tree->erase_channel(*(_param.begin()));
 			}
-			if (it->second.size() == 0)
-				_tree->erase_channel(*(_param.begin()));
 		}
 	}
 }
@@ -398,9 +398,9 @@ void    Parser::join()
 		else
 		{
 			it->second.add_member(*_user);
-			(_user->_wbuff).append("JOIN: you've joined the channel: " + it->second.get_name()) + "\n";
+			(_user->_wbuff).append("JOIN: you've joined the channel: " + it->second.get_name() + "\n");
 			if (it->second.get_topic() != "")
-				(_user->_wbuff).append("JOIN: topic of the channel is : " + it->second.get_topic()) + "\n";
+				(_user->_wbuff).append("JOIN: topic of the channel is : " + it->second.get_topic() + "\n");
 			(_user->_wbuff).append(it->second.print_members());
 		}
 	}
