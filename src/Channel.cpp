@@ -61,11 +61,8 @@ std::string Channel::print_members()
 	std::string	res;
 	std::vector<User*>	membs = get_members();
 
-	res.append(get_name() + " ");
 	for (size_t i = 0; i != membs.size() - 1; i++)
 		res.append(membs[i]->_nickname + " ");
-
 	res.append(membs[size() - 1]->_nickname + "\n");
-
 	return (res);
 }

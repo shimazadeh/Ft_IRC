@@ -37,6 +37,7 @@ class Parser
         void    join();
         void    privmsg();
         void    notice();
+        void    mode();
         void    kill(std::vector<struct pollfd>& _fds);
 
     private:
