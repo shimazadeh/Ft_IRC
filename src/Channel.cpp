@@ -20,19 +20,9 @@ void    Channel::add_member(User &user)
 	user._channels.push_back(this);
 }
 
-void    Channel::add_ban(std::string _username)
-{
-	_ban.push_back(_username);
-}
-
-void    Channel::add_oper(User &user)
-{
-	_opers.push_back(&user);
-}
-
 bool    Channel::erase_user(User &user)//idk if all prototyppe has to  be changes to user*
 {
-	if (erase_members(user) || erase_opers(user) || erase_ban(user._nickname))
+	if (erase_members(user))
 		return true;
 	return false;
 }
@@ -50,32 +40,6 @@ for (iterator_user i = _members.begin(); i < _members.end(); i++)
 	return false;
 }
 
-bool    Channel::erase_opers(User &user)
-{
-for (iterator_user i = _opers.begin(); i < _opers.end(); i++)
-{
-	if (*i == &user)
-	{
-		_opers.erase(i);
-		return true;
-	}
-}
-	return false;
-}
-
-bool    Channel::erase_ban(std::string _username)
-{
-	for (iterator_string i = _ban.begin(); i < _ban.end(); i++)
-	{
-		if ((*i).compare(_username))
-		{
-			_ban.erase(i);
-			return true;
-		}
-	}
-	return false;
-}
-
 bool    Channel::is_member(std::string _username)
 {
 	for (size_t i = 0; i != _members.size(); i++)
@@ -86,30 +50,10 @@ bool    Channel::is_member(std::string _username)
 	return false;
 }
 
-bool    Channel::is_ban(std::string _username)
-{
-	for (iterator_string i = _ban.begin(); i != _ban.end(); i++)
-	{
-		if (!(*i).compare(_username))
-			return true;
-	}
-	return false;
-}
-
-bool    Channel::is_oper(std::string _username)
-{
-	for (iterator_user i = _opers.begin(); i != _opers.end(); i++)
-	{
-		if (!(*i)->_nickname.compare(_username))
-			return true;
-	}
-	return false;
-}
-
 void    Channel::send_message_all_members(std::string _msg)
 {
-for (iterator_user it = _members.begin(); it != _members.end(); it++)
-	((*it)->_wbuff).append(_msg);
+	for (iterator_user it = _members.begin(); it != _members.end(); it++)
+		((*it)->_wbuff).append(_msg);
 }
 
 std::string Channel::print_members()
@@ -117,10 +61,11 @@ std::string Channel::print_members()
 	std::string	res;
 	std::vector<User*>	membs = get_members();
 
+	res.append(get_name() + " ");
 	for (size_t i = 0; i != membs.size() - 1; i++)
-		res.append(membs[i]->_username + ", ");
+		res.append(membs[i]->_nickname + " ");
 
-	res.append(membs[size() - 1]->_username + "\n");
+	res.append(membs[size() - 1]->_nickname + "\n");
 
 	return (res);
 }

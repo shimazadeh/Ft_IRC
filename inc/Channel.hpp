@@ -23,18 +23,10 @@ class Channel
          int         size();
 
          void    add_member(User &user);
-         void    add_ban(std::string name);
-         void    add_oper(User &user);
-
-
          bool    erase_user(User &user);//idk if all prototyppe has to  be changes to user*
          bool    erase_members(User &user);
-         bool    erase_opers(User &user);
-         bool    erase_ban(std::string _name);
 
          bool    is_member(std::string _name);
-         bool    is_ban(std::string _name);
-         bool    is_oper(std::string _name);
 
         std::string print_members();
 
@@ -42,8 +34,6 @@ class Channel
 
      private:
          std::vector<User*>          _members;
-         std::vector<User*>          _opers;
-         std::vector<std::string>    _ban;
          std::string                 _chname;
          std::string                 _topic;
         //do we need to create a limit for the number of users for each channel

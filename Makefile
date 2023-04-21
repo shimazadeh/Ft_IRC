@@ -10,11 +10,11 @@
 #                                                                              #
 # **************************************************************************** #
 
-TARGET   = Ft_IRC
+TARGET   = ircserv
 
 CC       = g++
 
-CFLAGS   = -Wall -Wextra -g3 -std=c++98 
+CFLAGS   = -Wall -Wextra -Werror -g3 -std=c++98
 
 LINKER   = g++
 
