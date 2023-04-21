@@ -403,7 +403,6 @@ void    Parser::join()
 				(_user->_wbuff).append("JOIN: topic of the channel is : " + it->second.get_topic()) + "\n";
 			(_user->_wbuff).append(it->second.print_members());
 		}
-		std::cout << "chanell size is " <<it->second.size() << std::endl;
 	}
 }
 
