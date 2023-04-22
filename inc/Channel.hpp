@@ -30,7 +30,7 @@ class Channel
 
         std::string print_members();
 
-        void    send_message_all_members(std::string _msg);
+        void    send_message_all_members(std::string _msg, std::string nickname);
 
      private:
          std::vector<User*>          _members;

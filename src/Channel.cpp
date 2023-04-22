@@ -50,10 +50,13 @@ bool    Channel::is_member(std::string _username)
 	return false;
 }
 
-void    Channel::send_message_all_members(std::string _msg)
+void    Channel::send_message_all_members(std::string _msg, std::string nickname)
 {
 	for (iterator_user it = _members.begin(); it != _members.end(); it++)
-		((*it)->_wbuff).append(_msg);
+	{
+		if (nickname != (*it)->_nickname)
+			((*it)->_wbuff).append(_msg);
+	}
 }
 
 std::string Channel::print_members()

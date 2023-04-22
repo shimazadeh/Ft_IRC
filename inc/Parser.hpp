@@ -31,6 +31,7 @@ class Parser
         bool    quit();
         void    part();
         void    topic();
+        void    who();
         void    names();
         void    list();
         void    kick();
