@@ -36,7 +36,7 @@ void    Server::set_up()
 	int on = 1;
 
 	_tmpfd.fd = socket(AF_INET6, SOCK_STREAM, 0);
-	
+
 	if (_tmpfd.fd < 0)
 	{
 		perror("socket() failed");

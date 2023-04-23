@@ -29,14 +29,16 @@ bool    Channel::erase_user(User &user)//idk if all prototyppe has to  be change
 
 bool    Channel::erase_members(User &user)
 {
-for (iterator_user i = _members.begin(); i < _members.end(); i++)
-{
-	if (*i == &user)
+	for (iterator_user i = _members.begin(); i < _members.end(); i++)
 	{
-		_members.erase(i);
-		return true;
+		std::cout << "inside erase members\n";
+		if (*i == &user)
+		{
+			std::cout << "erasing " << *i << std::endl;
+			_members.erase(i);
+			return true;
+		}
 	}
-}
 	return false;
 }
 
