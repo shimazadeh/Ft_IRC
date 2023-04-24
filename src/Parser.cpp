@@ -396,6 +396,7 @@ void    Parser::join()
 		for (size_t i = 0; i != channels.size(); i++)
 		{
 			std::map<std::string, Channel>::iterator it = _tree->get_channel().find(*(channels.begin()+ i));//multiple channel ?
+			std::string								 msg;
 
 			if (it != _tree->get_channel().end() && it->second.is_member(_user->_nickname))
 				return ;
@@ -407,10 +408,11 @@ void    Parser::join()
 					it = _tree->get_channel().find(*(channels.begin() + i));
 				}
 				it->second.add_member(*_user);
-				(_user->_wbuff).append(":" + _user->_nickname + " JOIN " + it->second.get_name() + "\n");
-				(_user->_wbuff).append(":" + _user->_nickname + " 332 " + _user->_nickname + " " + it->second.get_name() + " :" + it->second.get_topic() + "\n");
-				(_user->_wbuff).append(":" + _user->_nickname + " 353 "  + _user->_nickname + " = " +  it->second.get_name()  + " : " + it->second.print_members());
-				(_user->_wbuff).append(":" + _user->_nickname + " 366 "  + _user->_nickname + " " +  it->second.get_name()  + " :End of /NAMES list\n");
+				msg.append(":" + _user->_nickname + "!" + _user->_username + "@localhost JOIN " + it->second.get_name() + "\n");
+				msg.append(":" + _user->_nickname + "!" + _user->_username + "@localhost 332 " + _user->_nickname + " " + it->second.get_name() + " :" + it->second.get_topic() + "\n");
+				msg.append(":" + _user->_nickname + "!" + _user->_username + "@localhost 353 "  + _user->_nickname + " = " +  it->second.get_name()  + " : " + it->second.print_members());
+				msg.append(":" + _user->_nickname + "!" + _user->_username + "@localhost 366 "  + _user->_nickname + " " +  it->second.get_name()  + " :End of /NAMES list\n");
+				it->second.send_message_all_members(msg, "");
 			}
 		}
 	}
@@ -517,10 +519,14 @@ void	Parser::names()
 			if (tmp2 == _tree->get_channel().end())
 				(_user->_wbuff).append("401 " + _user->_nickname + " " + (*(_param.begin() + i)) + " :No such nick/channel\n");
 			else
+			{
 				msg.append(tmp2->second.print_members());
-			std::cout << "printing everybody\n";
-			(_user->_wbuff).append("353 " + _user->_nickname + " = " + tmp2->second.get_name() + " " + msg + "\n");
-			(_user->_wbuff).append("366 " + _user->_nickname + " " + tmp2->second.get_name() + " :End of /NAMES list\n");
+				tmp2->second.send_message_all_members("353 " + _user->_nickname + " = " + tmp2->second.get_name() + " " + msg + "\n", "");
+				tmp2->second.send_message_all_members("366 " + _user->_nickname + " " + tmp2->second.get_name() + " :End of /NAMES list\n", "");
+			}
+			// std::cout << "printing everybody\n";
+			// (_user->_wbuff).append("353 " + _user->_nickname + " = " + tmp2->second.get_name() + " " + msg + "\n");
+			// (_user->_wbuff).append("366 " + _user->_nickname + " " + tmp2->second.get_name() + " :End of /NAMES list\n");
 		}
 	}
 }
