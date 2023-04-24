@@ -22,7 +22,7 @@ SRCDIR   = src/
 
 OBJDIR   = obj/
 
-SOURCES  := src/Channel.cpp  src/main.cpp  src/Parser.cpp  src/Server.cpp  src/Tree.cpp  src/User.cpp
+SOURCES  := src/Channel.cpp  src/main.cpp  src/Parser.cpp  src/Server.cpp  src/Tree.cpp  src/User.cpp src/ft_itoa.cpp
 
 OBJECTS  := $(SOURCES:$(SRCDIR)%.cpp=$(OBJDIR)%.o)
 

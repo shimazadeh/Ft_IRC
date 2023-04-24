@@ -45,9 +45,36 @@ int	main(int ac, const char **av)
 //https://www.tutorialspoint.com/unix_sockets/network_host_names.htm
 //nc 127.0.0.1 port#
 
-//QUESTIONS:
+/*DEBUGGING
 
-/*
-2. CTRL D OF THE SERVER ? 
-3. TOPIC mia "" gives the name of the channel back
+I kinda understood format of the messages so I went through all the errors
+and fixed their formats, I fixed the parsing when we use nc with irssi
+client. below are the problems that I still have:
+
+1.Kick works and it doesnt allow the user to send msg to the channel but the channel window is open
+and if you try to join the same channel the client doesnt even send the command to our server ??? my theory is
+that the user needs to get invited if they get kicked out thats why irssi ignores the JOIN command after kick
+
+2.KILL works but if the user is inside the channel the msg is not sent in
+the channel but in the main window it says connection lost
+
+3. NAMES: will only send the name command when you are in the channel
+window, it never sends the "/NAME " command to our server. but there is a bug
+that if you join two people in the same channel, the second person who joined
+will recieved the correct list of names but the first person only gets
+the old list of names
+
+4. NAMES: if we test this with nc it works perfectly fine we could somehow
+justify this because idk why irssi doesnt send the command to us and it execute
+it by itself
+
+5. TOPIC doesnt work, I could not figure this one out
+
+6. List works only outside the channel window which is normal,
+I wrote an itoa function to use cuz I couldnt figure out the
+itoa library problem.
+
+I tested things running two irssi client and one nc client, if you have any ideas for the
+above problems maybe you can fix them? also can you run through the correction sheet one
+more time and find bugs and tell me what are the problems.
 */

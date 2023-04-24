@@ -3,6 +3,7 @@
 Channel::Channel(std::string name)
 {
 	_chname = name;
+	_topic = "";
 }
 Channel::~Channel(){}
 

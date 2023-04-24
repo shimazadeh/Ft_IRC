@@ -49,6 +49,8 @@ class Parser
         std::string                 _pass;
 
 };
+char	*ft_itoa(int nb);
+
 #endif
 
 /*
