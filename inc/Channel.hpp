@@ -23,7 +23,7 @@ class Channel
          int         size();
 
          void    add_member(User &user);
-         bool    erase_user(User &user);//idk if all prototyppe has to  be changes to user*
+         bool    erase_user(User &user);
          bool    erase_members(User &user);
 
          bool    is_member(std::string _name);
@@ -36,6 +36,5 @@ class Channel
          std::vector<User*>          _members;
          std::string                 _chname;
          std::string                 _topic;
-        //do we need to create a limit for the number of users for each channel
  };
 #endif

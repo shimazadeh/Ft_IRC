@@ -24,8 +24,8 @@ class Server
 
 
     private:
-        Tree                        _tree;//stores Users their fds and channels
-        Parser                      _par;//
+        Tree                        _tree;
+        Parser                      _par;
 
         std::vector<struct pollfd>  _fds;
         struct sockaddr_in6         _addr;

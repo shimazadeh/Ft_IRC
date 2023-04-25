@@ -29,7 +29,6 @@ User    *Tree::find_usr_by_nickname(std::string& nickname)
 {
 	if ((_user_to_nick.find(nickname) != _user_to_nick.end()))
 		return((_user_to_nick.find(nickname))->second);
-	std::cout << "sending null\n";
 	return NULL;
 }
 

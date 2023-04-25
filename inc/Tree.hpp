@@ -13,7 +13,7 @@ class Tree
     public:
         std::map<std::string, User*>      _user_to_nick;
         std::map<int, User*>              _user_to_fd;
-        std::map<std::string, Channel>    _chto_channel;//nicknames of all channels opened
+        std::map<std::string, Channel>    _chto_channel;
         Tree();
         ~Tree();
 
@@ -31,9 +31,6 @@ class Tree
 
         void    erase_user(User &user);
         void    erase_channel(std::string   _name);
-
-
-        //modify nickname
 };
 
 #endif

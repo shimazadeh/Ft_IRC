@@ -5,6 +5,7 @@ Channel::Channel(std::string name)
 	_chname = name;
 	_topic = "";
 }
+
 Channel::~Channel(){}
 
 std::string Channel::get_name(){return (_chname);}
@@ -30,12 +31,12 @@ bool    Channel::erase_user(User &user)//idk if all prototyppe has to  be change
 
 bool    Channel::erase_members(User &user)
 {
-	for (iterator_user i = _members.begin(); i < _members.end(); i++)
+	if (_members.size() == 0)
+		return true;
+	for (iterator_user i = _members.begin(); i != _members.end(); i++)
 	{
-		std::cout << "inside erase members\n";
 		if (*i == &user)
 		{
-			std::cout << "erasing " << *i << std::endl;
 			_members.erase(i);
 			return true;
 		}

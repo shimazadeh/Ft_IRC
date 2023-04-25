@@ -25,6 +25,8 @@ User::~User(){}
 
 void    User::erase_me_from_allchannel(std::vector<Channel*>  &_chan)
 {
+	if (_chan.size() == 0)
+		return ;
 	for (size_t i = 0; i < _chan.size(); ++i)
 		_chan[i]->erase_user(*this);
 	_chan.clear();

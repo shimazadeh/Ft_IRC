@@ -188,7 +188,7 @@ void    Server::handle_client_read(size_t &i)
 			_closscon = true;
 		}
 		if (_ret <= 0)
-			memcpy(_buffer, "QUIT unexpected_quit\r\n", 6);
+			memcpy(_buffer, "QUIT unexpected_quit\r\n", 22);
 		(_par.get_user())->_rbuff.append(_buffer);
 	}
 	std::cout << "read -> " << (_par.get_user())->_rbuff << std::endl;
@@ -202,7 +202,7 @@ void    Server::handle_client_write(size_t &i)
 	_ret = send(_fds[i].fd, &(user_ref->_wbuff)[0], user_ref->_wbuff.size(), 0);
 	if (_ret == -1)
 	{
-		memcpy(_buffer, "QUIT unexpected_quit\r\n", 6);
+		memcpy(_buffer, "QUIT unexpected_quit\r\n", 22);
 		_par.change_user(user_ref);
 		user_ref->_rbuff.append(_buffer);
 		_par.check_for_cmd(_closscon, _fds);
@@ -237,6 +237,5 @@ void    Server::handle_lsocket_read()
 		_tmpfd.events = POLLIN;
 		_fds.push_back(_tmpfd);
 		_tree.insert_by_fd(_tmpfd.fd);
-		std::cout << "check1: " << _tmpfd.fd << std::endl;
 	}
 }
