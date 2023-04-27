@@ -41,3 +41,32 @@ int	main(int ac, const char **av)
 
 	return 0;
 }
+/*
+PASS <ARG>
+
+NICK <ARG>
+
+USER <username> 0 * <realname>
+
+PING <ARG>
+
+OPER <name> <pass>
+
+QUIT [reason]
+
+JOIN <channel>{,<channel>} [<key>{,<key>}]
+
+PART <channel>,<channnel> [reason]
+
+TOPIC <channel> [topic]
+
+NAMES <channel>,<channel>
+
+KICK <channel> <user>,<user> [comment]
+
+PRIVMSG <target>,<target> <text to be sent>
+
+NOTICE <target>,<target> <text to be sent>
+
+KILL <nickname> <comment> //fixed: connect with nc try to kill a non-existing user ->seg fault
+*/

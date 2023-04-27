@@ -104,8 +104,6 @@ void    Parser::execute(bool& closecon, std::vector<struct pollfd>& _fds)
 		part();
 	else if (_cmd.compare("TOPIC") == 0 || _cmd.compare("topic") == 0)
 		topic();
-	else if (_cmd.compare("LIST") == 0 || _cmd.compare("list") == 0)
-		list();
 	else if (_cmd.compare("NAMES") == 0 || _cmd.compare("names") == 0)
 		names();
 	else if (_cmd.compare("KICK") == 0 || _cmd.compare("kick") == 0)
@@ -131,7 +129,7 @@ void    Parser::pass()
 {
 	if (_user->_regstat > 1)
 		(_user->_wbuff).append("462 " + _user->_nickname + " :You may not reregister\n");
-	else if (_param.size() != 1)
+	else if (_param.size() < 1)
 		(_user->_wbuff).append("461 " + _user->_nickname + " PASS :Not enough parameters\n");
 	else if (!(*(_param.begin())).compare(_pass))
 		_user->_regstat = 1;
@@ -146,7 +144,7 @@ void    Parser::nick()//2
 {
 	if (_user->_regstat == 0)
 		(_user->_wbuff).append("451 " + _user->_nickname + " :You have not registered\n");
-	else if (_param.size() != 1)
+	else if (_param.size() < 1)
 		(_user->_wbuff).append("461 " + _user->_nickname + " NICK :Not enough parameters\n");
 	else if (*(_param.begin()) == "")
 		(_user->_wbuff).append("431 " + _user->_nickname + " :No nickname given\n");
@@ -197,7 +195,7 @@ void    Parser::ping()
 {
 	if (_user->_regstat != 3)
 		(_user->_wbuff).append("462 " + _user->_nickname + " :You may not reregister\n");
-	else if (_param.size() != 1 || *(_param.begin()) == "")
+	else if (_param.size() < 1 || *(_param.begin()) == "")
 		(_user->_wbuff).append("461 " + _user->_nickname + " PING :Not enough parameters\n");
 	else
 		(_user->_wbuff).append("PONG " + *(_param.begin()) + "\n");
@@ -207,7 +205,7 @@ void    Parser::oper()//we choose to use our own password
 {
 	if (_user->_regstat != 3)
 		(_user->_wbuff).append("451 " + _user->_nickname + " :You have not registered\n");
-	else if (_param.size() != 2)
+	else if (_param.size() < 2 || *(_param.begin()) == "" || *(_param.begin() + 1) == "")
 		(_user->_wbuff).append("461 " + _user->_nickname + " OPER :Not enough parameters\n");
 	else if ((*(_param.begin() + 1)).compare(_pass))
 		(_user->_wbuff).append("464 " + _user->_nickname + " OPER :Password incorrect\n");
@@ -248,7 +246,7 @@ void    Parser::part()
 {
 	if (_user->_regstat != 3)
 		(_user->_wbuff).append("451 " + _user->_nickname + " :You have not registered\n");
-	else if (_param.size() < 1 || *(_param.begin()) == "" || *(_param.begin() + 1) == "")
+	else if (_param.size() < 1 || *(_param.begin()) == "")
 		(_user->_wbuff).append("461 " + _user->_nickname + " PART :Not enough parameters\n");
 	else
 	{
@@ -269,7 +267,7 @@ void    Parser::part()
 				for (size_t i = 1; i < _param.size() - 1; i++)
 					reason.append(*(_param.begin() + i) + " ");
 				reason.append(*(_param.begin() + _param.size() - 1) + "\n");
-				it->second.send_message_all_members(":" + _user->_nickname + "!" + _user->_username + "@localhost PART " + it->second.get_name() + " :has left the channel\n", "");
+				it->second.send_message_all_members(":" + _user->_nickname + "!" + _user->_username + "@localhost PART " + it->second.get_name() + " :has left the channel: " + reason + "\n", "");
 				it->second.erase_members(*_user);
 				for (std::vector<Channel*>::iterator i = (_user->_channels).begin(); i != (_user->_channels).end(); i++)
 				{
@@ -292,7 +290,7 @@ void    Parser::topic()
 
 	if (_user->_regstat != 3)
 		(_user->_wbuff).append("451 " + _user->_nickname + " :You have not registered\n");
-	else if (_param.size() < 1 || _param.size() > 2 || *(_param.begin()) == "")
+	else if (_param.size() < 1 || *(_param.begin()) == "")
 		(_user->_wbuff).append("461 " + _user->_nickname + " TOPIC :Not enough parameters\n");
 	else if (it != _tree->get_channel().end() && !it->second.is_member(_user->_nickname))
 		(_user->_wbuff).append("442 " + _user->_nickname + " " + (*(_param.begin())) + " :You're not on that channel\n");
@@ -308,7 +306,10 @@ void    Parser::topic()
 			if (it->second.get_topic() == "")
 				(_user->_wbuff).append("331 " + _user->_nickname + " " + (*(_param.begin())) + " :No topic is set\n");
 			else
+			{
 				(_user->_wbuff).append("332 " + _user->_nickname + " " + (*(_param.begin())) + " :" + (*(_param.begin() + 1)) + "\n");
+				it->second.get_topic() = *(_param.begin() + 1);
+			}
 		}
 	}
 	else
@@ -324,7 +325,7 @@ void    Parser::kick()
 
 	if (_user->_regstat != 3)
 		(_user->_wbuff).append("451 " + _user->_nickname + " :You have not registered\n");
-	else if (_param.size() != 3 || *(_param.begin()) == "" || *(_param.begin() + 1) == "")//limiting one user per kick our choise
+	else if (_param.size() < 2  || *(_param.begin()) == "" || *(_param.begin() + 1) == "")//limiting one user per kick our choise
 		(_user->_wbuff).append("461 " + _user->_nickname + " KICK :Not enough parameters\n");
 	else if (it == _tree->get_channel().end())
 		(_user->_wbuff).append("403 " + _user->_nickname + " " + (*(_param.begin())) + " :No such channel\n");
@@ -334,9 +335,18 @@ void    Parser::kick()
 		(_user->_wbuff).append("441 " + _user->_nickname + " " + (*(_param.begin() + 1)) + " " + it->second.get_name() + " :They aren't on that channel\n");
 	else if (it != _tree->get_channel().end())
 	{
+		std::string	comment;
+
+		if (_param.size() > 2)
+		{
+			for (size_t i = 2; i < _param.size() - 1; i++)
+				comment.append(*(_param.begin() + i) + " ");
+			comment.append(*(_param.begin() + _param.size() - 1));
+		}
+
 		if (it->second.is_member(*(_param.begin() + 1)))
 		{
-			it->second.send_message_all_members(":" + _user->_nickname + "!" + _user->_username + "@localhost KICK " + (*(_param.begin())) + " " + (*(_param.begin() + 1)) + "\n", "");
+			it->second.send_message_all_members(":" + _user->_nickname + "!" + _user->_username + "@localhost KICK " + (*(_param.begin())) + " " + (*(_param.begin() + 1)) + " " + comment + "\n", "");
 			it->second.erase_members(*(_tree->find_usr_by_nickname(*(_param.begin() + 1))));
 			if (it->second.size() == 0)
 				_tree->erase_channel(*(_param.begin()));
@@ -502,7 +512,7 @@ void	Parser::names()
 			std::map<std::string, Channel>::iterator tmp2 = _tree->find_channel(*(targets.begin() + i));
 
 			if (tmp2 == _tree->get_channel().end())
-				(_user->_wbuff).append("401 " + _user->_nickname + " " + (*(_param.begin() + i)) + " :No such nick/channel\n");
+				(_user->_wbuff).append("401 " + _user->_nickname + " " + (*(targets.begin() + i)) + " :No such nick/channel\n");
 			else
 			{
 				msg.append(tmp2->second.print_members());
@@ -513,54 +523,26 @@ void	Parser::names()
 	}
 }
 
-void	Parser::list()
-{
-	if (_user->_regstat != 3)
-		(_user->_wbuff).append("451 " + _user->_nickname + " :You have not registered\n");
-	else
-	{
-		std::vector<std::string>    targets;
-		std::string					msg;
-
-		if (*(_param.begin()) == "")
-		{
-			for (std::map<std::string, Channel>::iterator i = _tree->get_channel().begin(); i != _tree->get_channel().end(); i++)
-				targets.push_back(i->first);
-		}
-		else
-			targets = custom_split(*(_param.begin()));
-
-		for (size_t i = 0; i != targets.size(); i++)
-		{
-			std::map<std::string, Channel>::iterator tmp2 = _tree->find_channel(*(targets.begin() + i));
-
-			if (tmp2 == _tree->get_channel().end())
-				(_user->_wbuff).append("401 " + _user->_nickname + " " + (*(_param.begin() + i)) + " :No such nick/channel\n");
-			else
-			{
-				msg.append(tmp2->second.get_name() + " " + ft_itoa(tmp2->second.size()) + " :" + tmp2->second.get_topic() + " ");
-				msg.append(tmp2->second.print_members());
-			}
-		}
-		(_user->_wbuff).append("321 " + _user->_nickname + " Channel :Users  Names\n");
-		(_user->_wbuff).append("322 " + _user->_nickname + " " + msg);
-		(_user->_wbuff).append("323 " + _user->_nickname + " :End of /LIST\n");
-	}
-}
-
 void   Parser::kill(std::vector<struct pollfd>& _fds)
 {
-	if (_param.size() != 2 || *_param.begin() == "" || *(_param.begin() + 1) == "")
+	if (_param.size() < 2 || *_param.begin() == "" || *(_param.begin() + 1) == "")
 		(_user->_wbuff).append("461 " + _user->_nickname + " KILL :Not enough parameters\n");
 	else if (!_user->_opstat)
 		(_user->_wbuff).append("481 " + _user->_nickname + " :Permission Denied - You're not an IRC operator\n");
+	else if (!_tree->find_usr_by_nickname(*(_param.begin())))
+		(_user->_wbuff).append("401 " + _user->_nickname + " " + (*(_param.begin())) + " :No such nick/channel\n");
 	else
 	{
-		User* killed = _tree->find_usr_by_nickname(*(_param.begin()));
+		std::string				comment;
+		User* 					killed = _tree->find_usr_by_nickname(*(_param.begin()));
 		std::vector<Channel*>   ch_tmp = killed->_channels;
 
+		for (size_t i = 1; i != _param.size() - 1; i++)
+			comment.append(*(_param.begin() + i) + " ");
+		comment.append(*(_param.begin() + _param.size() - 1));
+
 		for (size_t i = 0; i < ch_tmp.size(); i++)
-			ch_tmp[i]->send_message_all_members(":" + _user->_nickname + " KILL " + ch_tmp[i]->get_name() + " :has left the channel\n", _user->_nickname);
+			ch_tmp[i]->send_message_all_members(":" + _user->_nickname + " KILL " + ch_tmp[i]->get_name() + " :has left the channel " + comment + "\n", "");
 		killed->erase_me_from_allchannel(killed->_channels);
 		int i = 0;
 		while (_fds[i].fd != killed->_fd)

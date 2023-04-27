@@ -33,7 +33,6 @@ class Parser
         void    topic();
         void    who();
         void    names();
-        void    list();
         void    kick();
         void    join();
         void    privmsg();
