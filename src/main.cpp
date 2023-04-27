@@ -69,4 +69,10 @@ PRIVMSG <target>,<target> <text to be sent>
 NOTICE <target>,<target> <text to be sent>
 
 KILL <nickname> <comment> //fixed: connect with nc try to kill a non-existing user ->seg fault
+
+problems:
+1. when you connect with nc and you quit or get kicked out the user has to do an enter to see the connection is lost
+2. sth weird about kill: connect three client one with nc two with irssi, kill one of the irssi client , the person who gets killed doesnt get the "you were kill by whoever" msg but the other user gets
+it. also if you kill the nc connection they dont get any msg that they were killed.
 */
+

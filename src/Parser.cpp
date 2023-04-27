@@ -542,7 +542,7 @@ void   Parser::kill(std::vector<struct pollfd>& _fds)
 		comment.append(*(_param.begin() + _param.size() - 1));
 
 		for (size_t i = 0; i < ch_tmp.size(); i++)
-			ch_tmp[i]->send_message_all_members(":" + _user->_nickname + " KILL " + ch_tmp[i]->get_name() + " :has left the channel " + comment + "\n", "");
+			ch_tmp[i]->send_message_all_members(":" + _user->_nickname + "!" + _user->_username + "@localhost KILL " + *(_param.begin()) + " :has left the channel " + comment + "\n", "");
 		killed->erase_me_from_allchannel(killed->_channels);
 		int i = 0;
 		while (_fds[i].fd != killed->_fd)
