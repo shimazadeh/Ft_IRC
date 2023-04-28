@@ -8,9 +8,9 @@ Server::Server(const char*  pass, const int port):  _tree(Tree()), _par(Parser(_
 	_addr.sin6_port        = htons(_port);
 
 	_ret = 1;
-	_closscon = false;
 	memset(&_tmpfd, 0, sizeof(_tmpfd));
 	memset(&_buffer, 0, sizeof(char) * BUFFER_SIZE);
+	_closscon.push_back(false);
 }
 
 Server::~Server()
@@ -91,32 +91,28 @@ void    Server::loop()
 		}
 		for (size_t i = 0; i < _fds.size(); i += 2)
 		{
-			_ret = check_revents(i, _fds[i].revents);
-			switch(_ret)
+			if (!_closscon[i])
 			{
-				case 1:
-					handle_lsocket_read();
-					break ;
-				case 2:
-					handle_client_read(i);
-					break;
-				case 4:
-					std::cout << "Poll(), incorrect revents" << std::endl;
-					user_ref = _tree.find_usr_by_fd(_fds[i].fd);
-					memcpy(_buffer, "QUIT unexpected_quit\r\n", 22);
-					_par.change_user(user_ref);
-					user_ref->_rbuff.append(_buffer);
-					_par.check_for_cmd(_closscon, _fds);
-					break ;
-				default:
-					break ;
-			}
-			if (_closscon)
-			{
-				close(_fds[i].fd);
-				_fds.erase(_fds.begin() + i);
-				_fds.erase(_fds.begin() + i - 1);
-				_closscon = false;
+				_ret = check_revents(i, _fds[i].revents);
+				switch(_ret)
+				{
+					case 1:
+						handle_lsocket_read();
+						break ;
+					case 2:
+						handle_client_read(i);
+						break;
+					case 4:
+						std::cout << "Poll(), incorrect revents" << std::endl;
+						user_ref = _tree.find_usr_by_fd(_fds[i].fd);
+						memcpy(_buffer, "QUIT unexpected_quit\r\n", 22);
+						_par.change_user(user_ref);
+						user_ref->_rbuff.append(_buffer);
+						_par.check_for_cmd(i, _closscon, _fds);
+						break ;
+					default:
+						break ;
+				}
 			}
 		}
 		for (size_t i = 1; i < _fds.size(); i += 2)
@@ -133,17 +129,26 @@ void    Server::loop()
 					memcpy(_buffer, "QUIT unexpected_quit\r\n", 22);
 					_par.change_user(user_ref);
 					user_ref->_rbuff.append(_buffer);
-					_par.check_for_cmd(_closscon, _fds);
+					_par.check_for_cmd(i, _closscon, _fds);
 					break ;
 				default:
 					break ;
 			}
-			if (_closscon)
+		}
+		for (size_t i = 1; i < _closscon.size(); i += 2)
+		{
+			if (_closscon[i])
 			{
-				close(_fds[i].fd);
-				_fds.erase(_fds.begin() + i + 1);
-				_fds.erase(_fds.begin() + i);
-				_closscon = false;
+				User* user = _tree.find_usr_by_fd(_fds[i].fd);
+				if ((user->_wbuff).empty())
+				{
+					_tree.erase_user(*user);
+					close(_fds[i].fd);
+					_fds.erase(_fds.begin() + i + 1);
+					_fds.erase(_fds.begin() + i);
+					_closscon.erase(_closscon.begin() + i + 1);
+					_closscon.erase(_closscon.begin() + i);
+				}
 			}
 		}
 		for (size_t i = 1; i < _fds.size(); i += 2)
@@ -169,9 +174,10 @@ void    Server::serv_exit(int _exitcode)
 
 void    Server::handle_client_read(size_t &i)
 {
+	bool close = false;
 	_par.change_user(_tree.find_usr_by_fd(_fds[i].fd));
 
-	while (!_closscon)
+	while (!close)
 	{
 		memset(_buffer, 0, sizeof(char) * BUFFER_SIZE);
 		_ret = recv(_fds[i].fd, _buffer, BUFFER_SIZE, 0);
@@ -180,19 +186,27 @@ void    Server::handle_client_read(size_t &i)
 			if (errno == EWOULDBLOCK)
 				break ;
 			perror("  recv() failed");
-			_closscon = true;
+			close = true;
 		}
 		if (_ret == 0)
 		{
 			std::cout << "  Connection closed" << std::endl;
-			_closscon = true;
+			close = true;
 		}
 		if (_ret <= 0)
+		{
 			memcpy(_buffer, "QUIT unexpected_quit\r\n", 22);
+			close = true;
+		}
 		(_par.get_user())->_rbuff.append(_buffer);
 	}
 	std::cout << "read -> " << (_par.get_user())->_rbuff << std::endl;
-	_par.check_for_cmd(_closscon, _fds);
+	_par.check_for_cmd(i, _closscon, _fds);
+	if (close)
+	{
+		_closscon[i] = true;
+		_closscon[i + 1] = true;
+	}
 }
 
 void    Server::handle_client_write(size_t &i)
@@ -205,7 +219,9 @@ void    Server::handle_client_write(size_t &i)
 		memcpy(_buffer, "QUIT unexpected_quit\r\n", 22);
 		_par.change_user(user_ref);
 		user_ref->_rbuff.append(_buffer);
-		_par.check_for_cmd(_closscon, _fds);
+		_par.check_for_cmd(i, _closscon, _fds);
+		_closscon[i] = true;
+		_closscon[i - 1] = true;
 		return ;
 	}
 	user_ref->_wbuff = (user_ref->_wbuff).substr(_ret);
@@ -237,5 +253,7 @@ void    Server::handle_lsocket_read()
 		_tmpfd.events = POLLIN;
 		_fds.push_back(_tmpfd);
 		_tree.insert_by_fd(_tmpfd.fd);
+		_closscon.push_back(false);
+		_closscon.push_back(false);
 	}
 }

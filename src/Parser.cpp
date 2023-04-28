@@ -19,7 +19,7 @@ void    Parser::change_user(User    *username)
 
 User    *Parser::get_user(){return (_user);}
 
-int    Parser::check_for_cmd(bool& closecon, std::vector<struct pollfd>& _fds)
+int    Parser::check_for_cmd(int c, std::vector<bool>& closecon, std::vector<struct pollfd>& _fds)
 {
 	std::string					buf;
 	size_t						pos(0);
@@ -35,7 +35,7 @@ int    Parser::check_for_cmd(bool& closecon, std::vector<struct pollfd>& _fds)
 		else
 			_user->_rbuff = (_user->_rbuff).substr(pos + 1);
 		fill_in_params(buf);
-		execute(closecon, _fds);
+		execute(c, closecon, _fds);
 	}
 	return 0;
 }
@@ -75,7 +75,7 @@ std::vector<std::string>    Parser::custom_split(std::string buf)
 	return (res);
 }
 
-void    Parser::execute(bool& closecon, std::vector<struct pollfd>& _fds)
+void    Parser::execute(int c, std::vector<bool>& closecon, std::vector<struct pollfd>& _fds)
 {
 	if (_cmd == "")
 		return ;
@@ -86,7 +86,12 @@ void    Parser::execute(bool& closecon, std::vector<struct pollfd>& _fds)
 	else if (_cmd.compare("QUIT") == 0 || _cmd.compare("quit") == 0)
 	{
 		if (quit())
-			closecon = true;
+		{
+			if (!(c % 2))
+				--c;
+			closecon[c] = true;
+			closecon[c + 1] = true;
+		}
 	}
 	else if (_cmd.compare("NICK") == 0 || _cmd.compare("nick") == 0)
 		nick();
@@ -115,7 +120,7 @@ void    Parser::execute(bool& closecon, std::vector<struct pollfd>& _fds)
 	else if (_cmd.compare("NOTICE") == 0 || _cmd.compare("notice") == 0)
 		notice();
 	else if (_cmd.compare("KILL") == 0 || _cmd.compare("kill") == 0)
-		kill(_fds);
+		kill(closecon, _fds);
 	else
 		(_user->_wbuff).append("421 " + _user->_nickname + " " + _cmd + " : Unknown command\n");
 }
@@ -232,7 +237,6 @@ bool    Parser::quit()
 	for (size_t i = 0; i < ch_tmp.size(); i++)
 		ch_tmp[i]->send_message_all_members(":" + _user->_nickname + "!" + _user->_username + "@localhost QUIT " + _user->_nickname + " :has left the channel " + reason + "\n", "");
 	_user->erase_me_from_allchannel(_user->_channels);
-	_tree->erase_user(*_user);
 	return (1);
 }
 
@@ -523,7 +527,7 @@ void	Parser::names()
 	}
 }
 
-void   Parser::kill(std::vector<struct pollfd>& _fds)
+void   Parser::kill(std::vector<bool>& closecon, std::vector<struct pollfd>& _fds)
 {
 	if (_param.size() < 2 || *_param.begin() == "" || *(_param.begin() + 1) == "")
 		(_user->_wbuff).append("461 " + _user->_nickname + " KILL :Not enough parameters\n");
@@ -540,17 +544,16 @@ void   Parser::kill(std::vector<struct pollfd>& _fds)
 		for (size_t i = 1; i != _param.size() - 1; i++)
 			comment.append(*(_param.begin() + i) + " ");
 		comment.append(*(_param.begin() + _param.size() - 1));
-
 		for (size_t i = 0; i < ch_tmp.size(); i++)
-			ch_tmp[i]->send_message_all_members(":" + _user->_nickname + "!" + _user->_username + "@localhost KILL " + *(_param.begin()) + " :has left the channel " + comment + "\n", "");
+			ch_tmp[i]->send_message_all_members(":" + killed->_nickname + "!" + killed->_username + "@localhost QUIT " + killed->_nickname + " :was killed by " + _user->_nickname + "\n", "");
+		killed->erase_me_from_allchannel(killed->_channels);
+		(killed->_wbuff).append(":" + _user->_nickname + "!" + _user->_username + "@localhost KILL " + *(_param.begin())  + "\n");
 		killed->erase_me_from_allchannel(killed->_channels);
 		int i = 0;
 		while (_fds[i].fd != killed->_fd)
 			++i;
-		close(_fds[i].fd);
-		_fds.erase(_fds.begin() + i + 1);
-		_fds.erase(_fds.begin() + i);
-		_tree->erase_user(*killed);
+		closecon[i] = true;
+		closecon[i + 1] = true;
 	}
 }
 

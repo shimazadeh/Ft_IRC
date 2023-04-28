@@ -33,7 +33,7 @@ class Server
         const char                  *_pass;
         const int                   _port;
         int                         _ret;
-        bool                        _closscon;
+        std::vector<bool>           _closscon;
 
         struct pollfd               _tmpfd;
         char                       _buffer[BUFFER_SIZE];

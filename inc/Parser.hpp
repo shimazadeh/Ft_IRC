@@ -17,11 +17,11 @@ class Parser
 
         void                        change_user(User    *username);
         User                        *get_user();
-        int                         check_for_cmd(bool& closecon, std::vector<struct pollfd>& _fds);
+        int                         check_for_cmd(int c, std::vector<bool>& closecon, std::vector<struct pollfd>& _fds);
         void                        fill_in_params(std::string  buf);
         std::vector<std::string>    custom_split(std::string buf);
 
-        void    execute(bool& closecon, std::vector<struct pollfd>& _fds);
+        void    execute(int c, std::vector<bool>& closecon, std::vector<struct pollfd>& _fds);
         void    pass();
         void    cap();
         void    nick();
@@ -38,7 +38,7 @@ class Parser
         void    privmsg();
         void    notice();
         void    mode();
-        void    kill(std::vector<struct pollfd>& _fds);
+        void    kill(std::vector<bool>& closecon, std::vector<struct pollfd>& _fds);
 
     private:
         std::string                  _cmd;
