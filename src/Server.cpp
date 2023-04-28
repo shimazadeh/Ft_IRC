@@ -103,7 +103,7 @@ void    Server::loop()
 						handle_client_read(i);
 						break;
 					case 4:
-						std::cout << "Poll(), 2 incorrect revents" << std::endl;
+						std::cout << "Poll(), incorrect revents" << std::endl;
 						user_ref = _tree.find_usr_by_fd(_fds[i].fd);
 						memcpy(_buffer, "QUIT unexpected_quit\r\n", 22);
 						_par.change_user(user_ref);
@@ -124,7 +124,7 @@ void    Server::loop()
 					handle_client_write(i);
 					break ;
 				case 4:
-					std::cout << "Poll(), 1 incorrect revents" << std::endl;
+					std::cout << "Poll(), incorrect revents" << std::endl;
 					user_ref = _tree.find_usr_by_fd(_fds[i].fd);
 					user_ref->_wbuff = "";
 					_closscon[i] = true;
