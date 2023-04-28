@@ -268,9 +268,12 @@ void    Parser::part()
 			{
 				std::string reason;
 
-				for (size_t i = 1; i < _param.size() - 1; i++)
-					reason.append(*(_param.begin() + i) + " ");
-				reason.append(*(_param.begin() + _param.size() - 1) + "\n");
+				if (_param.size() > 1)
+				{
+					for (size_t i = 1; i < _param.size() - 1; i++)
+						reason.append(*(_param.begin() + i) + " ");
+					reason.append(*(_param.begin() + _param.size() - 1) + "\n");
+				}
 				it->second.send_message_all_members(":" + _user->_nickname + "!" + _user->_username + "@localhost PART " + it->second.get_name() + " :has left the channel: " + reason + "\n", "");
 				it->second.erase_members(*_user);
 				for (std::vector<Channel*>::iterator i = (_user->_channels).begin(); i != (_user->_channels).end(); i++)
